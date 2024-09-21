@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import Link from 'next/link';
 import { getBaseUrl } from './utils/getBaseUrl';
+import { Button } from '@mui/material';
 
 // Fetch posts data from the API
 async function getHello(): Promise<{ message: string} | null> {
@@ -33,7 +34,9 @@ export default async function HomePage() {
 
       <h2>API Response</h2>
       <pre>{data?.message || 'Loading...'}</pre>
-      <Link href="/dashboard">Dashboard</Link>
+      <Button variant="text">Text</Button>
+      <Button variant="contained">Contained</Button>
+      <Button variant="outlined">Outlined</Button>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { AppModule } from './app.module';
 import configApp from './config/config.app';
 import configSecurityPolicy from './config/config.security';
 // import configSwagger from './config/config.swagger';
-import * as nextConfig from '../next.config.mjs';
+import * as nextConfig from '../next.config.js';
 
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Setup Next.js

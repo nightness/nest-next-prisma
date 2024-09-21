@@ -45,7 +45,7 @@ function startApp() {
     // spawnProcess('npx', ['tailwindcss', '-i', './app/globals.in.css', '-o', './app/globals.css'], { stdio: 'ignore', stderr: 'inherit' }).then(() => {
         spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest'], { stdio: 'inherit' }).then(() => {    
             console.log('Compilation complete');
-            child = spawn('node', ['.nest/main.js'], { stdio: 'inherit' });
+            child = spawn('node', ['.nest/src/main.js'], { stdio: 'inherit' });
             child.on('error', (error) => {
                 console.log('Error starting', command, ':', error.message);
             });        
