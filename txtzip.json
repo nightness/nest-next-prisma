@@ -1,0 +1,12 @@
+{
+    "overwrite": true,
+    "source-only": true,
+    "exclude": [
+        "components/**",
+        "components/*/**",
+        "lib/*/**",
+        "prisma/*/**",
+        "src/config/**",
+        "src/**/*.spec.ts"
+    ]
+}

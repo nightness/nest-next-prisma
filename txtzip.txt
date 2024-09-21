@@ -1,0 +1,725 @@
+=== Start of File: app/error.tsx ===
+// app/error.tsx
+'use client';
+
+import React from 'react';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <div>
+      <h1>An Error Occurred</h1>
+      <p>{error.message}</p>
+      <button onClick={() => reset()}>Try Again</button>
+    </div>
+  );
+}
+
+=== End of File: app/error.tsx ===
+
+=== Start of File: app/globals.in.css ===
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* app/globals.css */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+=== End of File: app/globals.in.css ===
+
+=== Start of File: app/layout.tsx ===
+// app/layout.tsx
+import React from 'react';
+import './globals.css';
+
+export const metadata = {
+  title: 'NestJS with Next.js',
+  description:
+    'An application integrating Next.js frontend with NestJS backend',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+
+=== End of File: app/layout.tsx ===
+
+=== Start of File: app/not-found.tsx ===
+// app/not-found.tsx
+import React from 'react';
+import Link from 'next/link';
+
+export default function NotFound() {
+  return (
+    <div>
+      <h1>404 - Page Not Found</h1>
+      <Link href="/">Go Home</Link>
+    </div>
+  );
+}
+
+=== End of File: app/not-found.tsx ===
+
+=== Start of File: app/page.tsx ===
+export const dynamic = 'force-dynamic';
+
+// app/page.tsx
+import React from 'react';
+import Link from 'next/link';
+import { getBaseUrl } from './utils/getBaseUrl';
+import Dashboard from '@/components/dashboard-04';
+
+// Fetch posts data from the API
+async function getHello(): Promise<{ message: string} | null> {
+  console.log("server component");
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/hello`, {
+      cache: 'no-store', // Disable caching to fetch fresh data on each request
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch posts: ${res.statusText}`);
+    }
+    const data = (await res.json()) as { message: string };
+    return data;
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return null;
+  }
+}
+
+export default async function HomePage() {
+  // const data = await getHello();
+
+  return (
+    <Dashboard />
+    // <div>
+    //   <h1>Welcome to NestJS with Next.js!</h1>
+    //   <p>This is the Next.js frontend served by NestJS.</p>
+
+    //   <h2>API Response</h2>
+    //   <pre>{data?.message || 'Loading...'}</pre>
+    //   <Link href="/dashboard">Dashboard</Link>
+    // </div>
+  );
+}
+
+=== End of File: app/page.tsx ===
+
+=== Start of File: app/utils/getBaseUrl.ts ===
+// app/utils/getBaseUrl.ts
+export function getBaseUrl() {
+  if (typeof window !== 'undefined') {
+    // Client-side: Use relative URL
+    return '';
+  }
+  // Server-side
+  return process.env.BASE_URL || 'http://localhost:3000';
+}
+
+=== End of File: app/utils/getBaseUrl.ts ===
+
+=== Start of File: components.json ===
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  }
+}
+=== End of File: components.json ===
+
+=== Start of File: jest.config.json ===
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "testMatch": [
+    "**/?(*.)+(spec|test).[jt]s?(x)",
+    "**/?(*.)+e2e-spec.ts?(x)"
+  ],
+  "transform": {
+    "^.+\\.(ts|tsx)$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+  },
+  "setupFilesAfterEnv": [
+    "<rootDir>/jest.setup.ts"
+  ],
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/main.ts",
+    "!src/**/*.module.ts"
+  ]
+}
+=== End of File: jest.config.json ===
+
+=== Start of File: jest.setup.ts ===
+// jest.setup.ts
+// import '@testing-library/jest-dom/extend-expect';
+
+=== End of File: jest.setup.ts ===
+
+=== Start of File: lib/utils.ts ===
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+=== End of File: lib/utils.ts ===
+
+=== Start of File: nest-cli.json ===
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src"
+}
+=== End of File: nest-cli.json ===
+
+=== Start of File: nodemon.json ===
+{
+    "watch": ["src"],
+    "ignore": [".next/*", "node_modules/*", "dist/*"],
+    "ext": "ts,tsx",
+    "exec": "ts-node --project tsconfig.server.json src/main.ts"
+  }
+  
+=== End of File: nodemon.json ===
+
+=== Start of File: package.json ===
+{
+  "name": "your-project",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "node start-dev.js",
+    "build": "tsc -p tsconfig.build.json && next build",
+    "start": "node dist/main.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md}\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.1",
+    "@nestjs/core": "^10.4.1",
+    "@nestjs/platform-express": "^10.0.0",
+    "@radix-ui/react-checkbox": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@shadcn/ui": "^0.0.4",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.4.5",
+    "helmet": "^7.1.0",
+    "lucide-react": "^0.445.0",
+    "next": "^14.2.10",
+    "prisma": "^5.19.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tree-kill": "^1.2.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.10.0",
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/schematics": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/supertest": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
+    "autoprefixer": "^10.4.20",
+    "chokidar": "^4.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "eslint": "^8",
+    "eslint-config-next": "^14.2.11",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.36.1",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "globals": "^15.9.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "postcss": "^8.4.47",
+    "prettier": "^3.3.3",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss": "^3.4.12",
+    "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.2.5",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "5.4.3",
+    "typescript-eslint": "^8.5.0"
+  }
+}
+
+=== End of File: package.json ===
+
+=== Start of File: src/app.controller.ts ===
+// src/app.controller.ts
+import { Controller, Get } from '@nestjs/common';
+
+@Controller()
+export class AppController {
+  @Get('hello')
+  getHello() {
+    return { message: 'Hello from NestJS API!' };
+  }
+}
+
+=== End of File: src/app.controller.ts ===
+
+=== Start of File: src/app.middleware.ts ===
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
+
+@Injectable()
+export class AppMiddleware implements NestMiddleware {
+  private logger = new Logger('HTTP');
+
+  use(req: Request, res: Response, next: NextFunction): void {
+    const start = Date.now();
+
+    // Log requests
+    res.on('finish', () => {
+      const responseTime = Date.now() - start;
+      const message = `${req.method} ${req.originalUrl} ${res.statusCode} ${
+        res.get('Content-Length') || 0
+      } - ${responseTime}`;
+
+      // Log the request
+      this.logger.log(message);
+    });
+
+    // Loosen CSP for Swagger routes
+    if (
+      req.path.startsWith('/swagger') ||
+      req.path.startsWith('/favicon.ico')
+    ) {
+      res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;",
+      );
+    }
+
+    next();
+  }
+}
+
+=== End of File: src/app.middleware.ts ===
+
+=== Start of File: src/app.module.ts ===
+// src/app.module.ts
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+
+@Module({
+  controllers: [AppController],
+  providers: [],
+})
+export class AppModule {}
+
+=== End of File: src/app.module.ts ===
+
+=== Start of File: src/app.service.ts ===
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+
+=== End of File: src/app.service.ts ===
+
+=== Start of File: src/main.ts ===
+// src/main.ts
+import 'reflect-metadata';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { NextFunction, Request, Response } from 'express';
+import Next from 'next';
+
+import { AppModule } from './app.module';
+import configApp from './config/config.app';
+import configSecurityPolicy from './config/config.security';
+
+NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
+  // Setup Next.js
+  const dev = process.env.NODE_ENV !== 'production';
+  const nextApp = Next({ dev });
+  const handle = nextApp.getRequestHandler();
+  await nextApp.prepare();
+
+  // Set global prefix for API routes
+  app.setGlobalPrefix('api');
+
+  // Middleware to handle Next.js routing
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.url.startsWith('/api')) {
+      return next();
+    }
+    return handle(req, res);
+  });
+
+  // Config App
+  const listen = configApp(app);
+
+  // Config Security Policy
+  configSecurityPolicy(app);
+
+  // Listen for connections
+  listen().then(() => {
+    console.log(`> Ready on http://localhost:3000`);
+  });
+});
+
+=== End of File: src/main.ts ===
+
+=== Start of File: src/tsconfig.json ===
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+
+=== End of File: src/tsconfig.json ===
+
+=== Start of File: start-dev.js ===
+const chokidar = require('chokidar');
+const { spawn } = require('child_process');
+const kill = require('tree-kill');
+
+let child = null;
+
+function spawnProcess(command, args, options = {}) {
+    return new Promise((resolve, reject) => {
+        child = spawn(command, args, {
+            stdio: 'inherit', // Use this to inherit stdio so you can see output in the console
+            ...options,
+        });
+
+        // Resolve the promise if the child process finishes successfully
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`Process exited with code ${code}`));
+            }
+        });
+
+        // Handle any errors in spawning the process
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
+
+// Initialize watcher.
+const watcher = chokidar.watch('./src', {
+    persistent: true,
+    ignoreInitial: true,
+    usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
+});
+
+// Start the app
+function startApp() {
+    spawnProcess('npx', ['tailwindcss', '-i', './app/globals.in.css', '-o', './app/globals.css'], { stdio: 'ignore', stderr: 'inherit' }).then(() => {
+        spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest'], { stdio: 'inherit' }).then(() => {    
+            console.log('Compilation complete');
+            child = spawn('node', ['.nest/main.js'], { stdio: 'inherit' });
+            child.on('error', (error) => {
+                console.log('Error starting', command, ':', error.message);
+            });        
+        }).catch((error) => {
+            console.error('Error compiling:', error.message);
+        });
+    }).catch((error) => {
+        console.error('Error compiling:', error.message);
+    });
+}
+
+process.on('SIGINT', () => {
+    console.log('\nShutting down...');
+    if (child) {
+        console.log('Killing child process...');
+        kill(child.pid, 'SIGKILL');    
+    }
+    process.exit();
+});
+
+
+// Event listeners for when files change
+watcher.on('change', (path) => {
+    console.log(`${path} has been changed. Restarting app...`);
+    if (child) {
+        kill(child.pid, 'SIGKILL', (err) => {
+            if (err) {
+                console.error('Error killing child process:', err);
+            } else {
+                child = null;
+                startApp();
+            }
+        });
+    }
+});
+
+watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
+
+// Start the app
+console.log('Starting app...');
+startApp();
+
+=== End of File: start-dev.js ===
+
+=== Start of File: tailwind.config.ts ===
+import type { Config } from "tailwindcss"
+
+const config = {
+  darkMode: ["class"],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+	],
+  theme: {},
+  plugins: [require("tailwindcss-animate")],
+} satisfies Config
+
+export default config
+=== End of File: tailwind.config.ts ===
+
+=== Start of File: tsconfig.build.json ===
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "ES2020",
+    "declaration": true,
+    "noEmit": false,
+    "removeComments": true
+  },
+  "include": [
+    "src/**/*"
+  ],    
+  "exclude": [
+    "node_modules",
+    "test",
+    "**/*spec.ts",
+    "**/*.test.ts",
+    ".next",
+    "pages",
+    "app"
+  ]
+}
+
+=== End of File: tsconfig.build.json ===
+
+=== Start of File: tsconfig.json ===
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": false,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+=== End of File: tsconfig.json ===
+
+=== Start of File: tsconfig.server.json ===
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noEmit": false,
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".next"
+  ]
+}
+=== End of File: tsconfig.server.json ===
