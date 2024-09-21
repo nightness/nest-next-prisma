@@ -22,10 +22,22 @@ function startApp() {
 
 process.on('SIGINT', () => {
     console.log('\nShutting down...');
-    kill(child.pid, 'SIGKILL');
-    process.exit();
-});
 
+    if (child) {
+        // console.log('Killing child process...');
+        kill(child.pid, 'SIGKILL', (err) => {
+            if (err) {
+                console.error('Error killing child process:', err);
+            }
+            // kill(process.pid, 'SIGKILL');
+            process.kill(process.pid, 'SIGKILL');
+        });
+    } else {
+        // process.exit();
+        // kill(process.pid, 'SIGKILL');
+        process.kill(process.pid, 'SIGKILL');
+    }    
+});
 
 // Event listeners for when files change
 watcher.on('change', (path) => {
