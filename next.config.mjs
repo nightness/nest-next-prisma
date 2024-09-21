@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    webpack: (config, { isServer }) => {
+        // Add custom CSS handling if necessary
+        return config;
+      },    
     // webpack: (config, { isServer }) => {
     //     if (!isServer) {
     //         config.resolve.alias['@sentry/node'] = '@sentry/browser';

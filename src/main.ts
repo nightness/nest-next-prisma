@@ -9,11 +9,12 @@ import { AppModule } from './app.module';
 import configApp from './config/config.app';
 import configSecurityPolicy from './config/config.security';
 // import configSwagger from './config/config.swagger';
+import * as nextConfig from '../next.config.mjs';
 
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Setup Next.js
   const dev = process.env.NODE_ENV !== 'production';
-  const nextApp = Next({ dev });
+  const nextApp = Next({ dev, conf: nextConfig, dir: './',  });
   const handle = nextApp.getRequestHandler();
   await nextApp.prepare();
 

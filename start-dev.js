@@ -42,7 +42,7 @@ function startApp() {
 
     // npx tailwindcss -i ./src/input.css -o ./src/output.css --watch
     // spawnProcess('npx', ['tailwindcss', '-i', './app/global.in.css', '-o', './app/global.css', '--watch'], { stdio: 'inherit' });
-    spawnProcess('npx', ['tailwindcss', '-i', './app/globals.in.css', '-o', './app/globals.css'], { stdio: 'ignore', stderr: 'inherit' }).then(() => {
+    // spawnProcess('npx', ['tailwindcss', '-i', './app/globals.in.css', '-o', './app/globals.css'], { stdio: 'ignore', stderr: 'inherit' }).then(() => {
         spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest'], { stdio: 'inherit' }).then(() => {    
             console.log('Compilation complete');
             child = spawn('node', ['.nest/main.js'], { stdio: 'inherit' });
@@ -52,9 +52,9 @@ function startApp() {
         }).catch((error) => {
             console.error('Error compiling:', error.message);
         });
-    }).catch((error) => {
-        console.error('Error compiling:', error.message);
-    });
+    // }).catch((error) => {
+    //     console.error('Error compiling:', error.message);
+    // });
 }
 
 process.on('SIGINT', () => {
