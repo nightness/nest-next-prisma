@@ -1,6 +1,6 @@
 {
     "watch": ["src"],
-    "ignore": [".next/*", "node_modules/*"],
+    "ignore": [".next/*", "node_modules/*", "dist/*"],
     "ext": "ts,tsx",
     "exec": "ts-node --project tsconfig.server.json src/main.ts"
   }

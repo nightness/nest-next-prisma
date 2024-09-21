@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import React from 'react';
 import Link from 'next/link';
 import { getBaseUrl } from './utils/getBaseUrl';
+import Dashboard from '@/components/dashboard-04';
 
 // Fetch posts data from the API
 async function getHello(): Promise<{ message: string} | null> {
@@ -24,16 +25,17 @@ async function getHello(): Promise<{ message: string} | null> {
 }
 
 export default async function HomePage() {
-  const data = await getHello();
+  // const data = await getHello();
 
   return (
-    <div>
-      <h1>Welcome to NestJS with Next.js!</h1>
-      <p>This is the Next.js frontend served by NestJS.</p>
+    <Dashboard />
+    // <div>
+    //   <h1>Welcome to NestJS with Next.js!</h1>
+    //   <p>This is the Next.js frontend served by NestJS.</p>
 
-      <h2>API Response</h2>
-      <pre>{data?.message || 'Loading...'}</pre>
-      <Link href="/dashboard">Dashboard</Link>
-    </div>
+    //   <h2>API Response</h2>
+    //   <pre>{data?.message || 'Loading...'}</pre>
+    //   <Link href="/dashboard">Dashboard</Link>
+    // </div>
   );
 }
