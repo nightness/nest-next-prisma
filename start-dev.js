@@ -4,6 +4,29 @@ const kill = require('tree-kill');
 
 let child = null;
 
+function spawnProcess(command, args, options = {}) {
+    return new Promise((resolve, reject) => {
+        child = spawn(command, args, {
+            stdio: 'inherit', // Use this to inherit stdio so you can see output in the console
+            ...options,
+        });
+
+        // Resolve the promise if the child process finishes successfully
+        child.on('close', (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`Process exited with code ${code}`));
+            }
+        });
+
+        // Handle any errors in spawning the process
+        child.on('error', (err) => {
+            reject(err);
+        });
+    });
+}
+
 // Initialize watcher.
 const watcher = chokidar.watch('./src', {
     persistent: true,
@@ -13,7 +36,15 @@ const watcher = chokidar.watch('./src', {
 
 // Start the app
 function startApp() {
-    child = spawn('npx', ['ts-node', '--project', 'tsconfig.server.json', 'src/main.ts'], { stdio: 'inherit' });
+    // child = spawn('npx', ['ts-node', '--project', 'tsconfig.server.json', 'src/main.ts'], { stdio: 'inherit' });
+    // spawnProcess('npx', ['ts-node', '--project', 'tsconfig.server.json', 'src/main.ts'], { stdio: 'inherit' });
+    // spawnProcess('tsc --project tsconfig.server.json --watch src/main.ts', { stdio: 'inherit' });
+    spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest'], { stdio: 'inherit' }).then(() => {    
+        console.log('Compilation complete');
+        child = spawn('node', ['.nest/main.js'], { stdio: 'inherit' });
+    }).catch((error) => {
+        console.error('Error compiling:', error.message);
+    });
 
     child.on('error', (error) => {
         console.log('Error starting', command, ':', error.message);
@@ -21,8 +52,11 @@ function startApp() {
 }
 
 process.on('SIGINT', () => {
-    console.log('\nShutting down...');    
-    kill(child.pid, 'SIGKILL');    
+    console.log('\nShutting down...');
+    if (child) {
+        console.log('Killing child process...');
+        kill(child.pid, 'SIGKILL');    
+    }
     process.exit();
 });
 

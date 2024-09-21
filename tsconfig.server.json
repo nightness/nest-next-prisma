@@ -2,7 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noEmit": false,
   },
   "include": [
     "src/**/*"
