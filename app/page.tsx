@@ -1,4 +1,7 @@
-export const dynamic = 'force-dynamic';
+"use client";
+
+// export const dynamic = 'force-dynamic';
+
 
 // app/page.tsx
 import React from 'react';
