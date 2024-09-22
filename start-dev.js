@@ -10,9 +10,8 @@ process.stdin.setRawMode(true);
 // Prevent Ctrl+C from terminating the process
 process.stdin.on('keypress', (str, key) => {
   if (key.ctrl && key.name === 'c') {
-      console.log('Ctrl+C was pressed, but it is disabled.');
-      // You can choose to do nothing or handle custom logic here
-      // If you want to explicitly exit later, you can use `process.exit()` manually
+    // console.log('Ctrl+C was pressed, but it is disabled.');
+    shutdown();
   }
 });
 
@@ -81,7 +80,7 @@ async function killProcesses() {
   await Promise.all(
     processes.map((childProcess) =>
       new Promise((resolve) => {
-        console.log(`Killing process ${childProcess.pid}`);
+        // console.log(`Killing process ${childProcess.pid}`);
         kill(childProcess.pid, 'SIGTERM', (err) => {
           if (err) {
             console.error(`Error killing process ${childProcess.pid}:`, err);
@@ -102,7 +101,7 @@ async function killProcesses() {
   await Promise.all(
     processes.map((childProcess) =>
       new Promise((resolve) => {
-        console.log(`Force killing process ${childProcess.pid}`);
+        // console.log(`Force killing process ${childProcess.pid}`);
         kill(childProcess.pid, 'SIGKILL', (err) => {
           if (err) {
             console.error(`Error force killing process ${childProcess.pid}:`, err);
@@ -115,7 +114,7 @@ async function killProcesses() {
 }
 
 let shuttingDown = false;
-process.on('SIGINT', async () => {
+async function shutdown() {
   if (!shuttingDown) {
     shuttingDown = true;
     console.log('\nShutting down...');
@@ -142,7 +141,6 @@ process.on('SIGINT', async () => {
 
   // Wait for all tracked promises to finish before exiting
   await Promise.all(Array.from(activePromises));
-  // console.log('All processes killed');
 
   // Stop reading from stdin
   // process.stdin.setRawMode(false); // TTY mode
@@ -150,7 +148,11 @@ process.on('SIGINT', async () => {
 
   // 100ms delay to allow console output to complete
   await new Promise((resolve) => setTimeout(resolve, 100));
-  
+}
+
+process.on('SIGINT', async () => { 
+  await shutdown();
+
   // Exit the process
   process.exit();
 });
@@ -175,7 +177,7 @@ watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
   // Start the app
   console.log('Starting app...');
   try {
-    trackPromise(startApp())
+    await trackPromise(startApp())
   } catch (error) {
     console.error('Error starting app:', error.message);
   }
