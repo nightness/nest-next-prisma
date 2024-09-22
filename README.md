@@ -167,7 +167,7 @@ This project is **UNLICENSED**. See the [LICENSE](LICENSE) file for more details
 
 ## Notes
 
-- **No Nodemon**: The project does **not** use Nodemon. Hot reloading is handled by Next.js during development.
+- **No Nodemon**: The project does **not** use Nodemon. Hot reloading is handled by Next.js during development and a custom Nest server run script.
 - **Development Server**: A custom script `start-dev.js` is used to start the development server and watch for changes.
 
 ## Conclusion
