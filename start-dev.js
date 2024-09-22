@@ -65,7 +65,7 @@ async function compile() {
 async function startApp() {
   try {
     await compile();
-    console.log('Compilation complete');
+    // console.log('Compilation complete');
     await trackPromise(spawnProcess('node', ['.nest/src/main.js']));
   } catch (error) {
     console.error('Error during app execution:', error.message);
