@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -9,8 +11,7 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 
-
-import { styled } from '@mui/material';
+import { styled } from '@mui/system';
 import Toolbar from '@mui/material/Toolbar';
 
 

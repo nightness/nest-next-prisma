@@ -4,62 +4,47 @@ Starter template that incorporates a **Next.js** frontend with a **NestJS** back
 
 ## Description
 
-This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack application with server-side rendering (SSR) and API capabilities. The current implementation includes example code for posts and blogs to demonstrate the integration between the frontend and backend.
+This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack application with server-side rendering (SSR) and API capabilities. The template is designed to provide a solid foundation for building applications with modern React features and Material UI components.
 
-The goal of this template is to provide a solid foundation for building applications that can be extended with UI components from [shadcn/ui](https://ui.shadcn.com/) and backend modules for features like authentication, user profiles, blogs, and more. Future enhancements include CLI commands to install and configure popular tools like Tailwind CSS, Prisma, and add frontend or backend modules to the project.
+The current implementation includes example code for a dashboard and demonstrates how to integrate Material UI (MUI) v6 with Next.js and NestJS. It also shows how to properly configure client-side components using the `"use client"` directive required by Next.js for components that utilize React hooks or state.
 
 ## Features
 
-- **Next.js Frontend**: A React-based frontend with server-side rendering.
+- **Next.js Frontend**: A React-based frontend with server-side rendering, utilizing the Next.js app directory structure.
 - **NestJS Backend**: A robust backend framework for building scalable server-side applications.
-- **API Integration**: Demonstrates how to fetch data from the NestJS API in Next.js pages.
-- **Example Modules**: Includes example code for posts and blogs.
+- **Material UI Integration**: Demonstrates how to integrate MUI v6 with Next.js, including theming and styled components.
+- **Client Components**: Proper usage of the `"use client"` directive in Next.js for client-side components.
 - **TypeScript**: Written entirely in TypeScript for type safety and better developer experience.
 - **Testing Setup**: Configured with Jest for unit and integration testing.
 - **Linting and Formatting**: ESLint and Prettier are set up for code quality and consistency.
-- **Hot Reloading**: Nodemon is configured for development to automatically restart the server on code changes.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js**: Ensure you have Node.js (v14.x or later) installed.
-- **npm or Yarn**: Use npm (comes with Node.js) or install Yarn.
+- **Node.js**: Ensure you have Node.js (v16.x or later) installed.
+- **npm, yarn, pnpm**: Use to manage dependencies.
 
 ### Installation
 
 1. **Clone the Repository**
-
-   ```bash
-   git clone https://github.com/nightness/nested-nextjs
-   cd nested-nextjs
-   ```
-
 2. **Install Dependencies**
-
-   Using npm:
 
    ```bash
    npm install
-   ```
-
-   Or using Yarn:
-
-   ```bash
-   yarn install
    ```
 
 ### Running the Application
 
 #### Development Mode
 
-To start the application in development mode with hot reloading:
+To start the application in development mode:
 
 ```bash
 npm run dev
 ```
 
-This command runs the NestJS server and Next.js frontend together. The application will be available at `http://localhost:3000`.
+This command runs both the NestJS server and the Next.js frontend together. The application will be available at `http://localhost:3000`.
 
 #### Production Mode
 
@@ -74,40 +59,38 @@ npm start
 
 ```plaintext
 ├── app/                    # Next.js frontend application
+│   ├── _dashboard/         # Dashboard components
+│   │   ├── Dashboard.tsx
+│   │   └── components/
+│   │       ├── AppNavbar.tsx
+│   │       └── MenuButton.tsx
 │   ├── page.tsx            # Home page
-│   ├── posts/              # Posts pages
-│   │   ├── [id]/page.tsx   # Individual post page
-│   │   ├── page.tsx        # Posts list page
-│   │   └── posts.module.css# CSS module for posts
 │   ├── layout.tsx          # Root layout
 │   ├── error.tsx           # Error boundary
 │   ├── not-found.tsx       # 404 page
 │   ├── globals.css         # Global CSS
-│   ├── types/              # TypeScript types
-│   └── utils/              # Utility functions
+│   ├── theme/              # MUI theme configuration
+│   │   └── index.ts        # Theme setup
+│   └── types/              # TypeScript types
 ├── src/                    # NestJS backend application
 │   ├── app.controller.ts   # Root controller
+│   ├── app.middleware.ts   # Middleware
 │   ├── app.module.ts       # Root module
 │   ├── main.ts             # Entry point
-│   └── blog/               # Blog module
-│       ├── blog.controller.ts
-│       ├── blog.service.ts
-│       └── interfaces/
-│           └── post.interface.ts
 ├── jest.config.json        # Jest configuration
-├── next.config.mjs         # Next.js configuration
+├── next.config.js          # Next.js configuration
 ├── package.json            # Project metadata and scripts
 ├── tsconfig.json           # TypeScript configuration
 ├── tsconfig.build.json     # TypeScript build configuration for NestJS
 ├── tsconfig.server.json    # TypeScript configuration for server-side code
 ├── eslint.config.mjs       # ESLint configuration
 ├── .prettierrc             # Prettier configuration
-└── nodemon.json            # Nodemon configuration for development
+└── start-dev.js            # Custom development server script
 ```
 
 ## Available Scripts
 
-- **`npm run dev`**: Starts the development server with hot reloading.
+- **`npm run dev`**: Starts the development server.
 - **`npm run build`**: Builds the application for production.
 - **`npm start`**: Starts the built application in production mode.
 - **`npm run lint`**: Runs ESLint to check for linting errors.
@@ -121,16 +104,74 @@ npm start
 
 ### Accessing the Application
 
-- **Home Page**: Visit `http://localhost:3000/` to see the welcome message and API response.
-- **Posts List**: Navigate to `http://localhost:3000/posts` to view a list of blog posts.
-- **Single Post**: Click on any post title to view its content.
+- **Home Page**: Visit `http://localhost:3000/` to see the home page.
+- **Dashboard**: Navigate to `http://localhost:3000/dashboard` to view the dashboard (if implemented).
 
-### API Endpoints
+### Notes on Next.js and Client Components
 
-- **Get Welcome Message**: `GET http://localhost:3000/api/hello`
-- **Get All Posts**: `GET http://localhost:3000/api/posts`
-- **Get Single Post**: `GET http://localhost:3000/api/posts/:id`
+- **Client Components**: Components that use React hooks, state, or other client-side features must include the `"use client"` directive at the top of the file.
+- **Example**:
+
+  ```tsx
+  // app/page.tsx
+
+  "use client";
+
+  import React from 'react';
+
+  const HomePage = () => {
+    // React hooks and state can be used here
+    return <div>Welcome to the Home Page</div>;
+  };
+
+  export default HomePage;
+  ```
+
+### Material UI Integration
+
+- **MUI v6**: The project uses Material UI version 6.
+- **Importing Components and Utilities**:
+
+  - Import `styled` and other utilities directly from `'@mui/material'`.
+  - Ensure that all MUI-related imports are consistent and up-to-date.
+
+- **Theme Configuration**:
+
+  - The MUI theme is configured in `app/theme/index.ts`.
+
+## Important Configuration Notes
+
+- **TypeScript Configuration**: Ensure that your `tsconfig.json` and `tsconfig.server.json` files have correct configurations for both client and server code.
+- **Dependencies**:
+
+  - Ensure that all MUI and Emotion packages are on compatible versions.
+  - Use the following versions (or update to the latest compatible versions):
+
+    ```json
+    {
+      "dependencies": {
+        "@mui/material": "^6.1.1",
+        "@mui/system": "^6.1.1",
+        "@emotion/react": "^11.11.0",
+        "@emotion/styled": "^11.11.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "next": "^13.5.0"
+      }
+    }
+    ```
 
 ## License
 
 This project is **UNLICENSED**. See the [LICENSE](LICENSE) file for more details.
+
+## Notes
+
+- **No Nodemon**: The project does **not** use Nodemon. Hot reloading is handled by Next.js during development.
+- **Development Server**: A custom script `start-dev.js` is used to start the development server and watch for changes.
+
+## Conclusion
+
+This updated template provides a modern starting point for building full-stack applications with NestJS and Next.js, integrating Material UI components, and following best practices for client-side React development. It demonstrates how to properly configure and use client components in Next.js, especially when integrating with libraries like Material UI.
+
+Feel free to extend this template with additional features such as authentication, database integration, and more UI components.
