@@ -3,21 +3,23 @@ const { spawn } = require('child_process');
 const kill = require('tree-kill');
 const readline = require('readline');
 
+// Array to store all running processes
+let processes = [];
+
+// Set to store all active promises
+const activePromises = new Set();
+
 // Create a readline interface
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 
-// Prevent Ctrl+C from terminating the process
+// Prevent Ctrl+C from sending SIGINT to the process
 process.stdin.on('keypress', (str, key) => {
   if (key.ctrl && key.name === 'c') {
     // console.log('Ctrl+C was pressed, but it is disabled.');
     shutdown();
   }
 });
-
-let processes = [];
-
-const activePromises = new Set();
 
 // Helper function to track promises
 function trackPromise(promise) {
@@ -29,6 +31,7 @@ function trackPromise(promise) {
   return promise;
 }
 
+// Helper function to spawn a child process
 function spawnProcess(command, args, options = {}) {
   return trackPromise(new Promise((resolve, reject) => {
     let childProcess = spawn(command, args, {
@@ -61,12 +64,15 @@ async function compile() {
   return trackPromise(spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']));
 }
 
+async function startServer() {
+  return await trackPromise(spawnProcess('node', ['.nest/src/main.js']));
+}
+
 // Start the app
 async function startApp() {
   try {
     await compile();
-    // console.log('Compilation complete');
-    await trackPromise(spawnProcess('node', ['.nest/src/main.js']));
+    await startServer()
   } catch (error) {
     console.error('Error during app execution:', error.message);
   }
@@ -182,5 +188,4 @@ watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
     console.error('Error starting app:', error.message);
   }
 })();
-
 process.stdin.resume(); // Keep the process alive
