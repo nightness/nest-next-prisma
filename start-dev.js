@@ -59,6 +59,10 @@ const watcher = chokidar.watch('./src', {
   usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
 });
 
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Helper function to compile the app
 async function compile() {
   return trackPromise(spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']));
@@ -82,6 +86,39 @@ async function killProcesses() {
   // Filter out processes that have already been killed
   processes = processes.filter((proc) => !proc.killed);
 
+  if (processes.length === 0) {
+    return;
+  }
+
+  // // Kill each process gracefully with SIGINT
+  // await Promise.all(
+  //   processes.map((childProcess) =>
+  //     new Promise((resolve) => {
+  //       // console.log(`Killing process ${childProcess.pid}`);
+  //       kill(childProcess.pid, 'SIGINT', (err) => {
+  //         if (err) {
+  //           console.error(`Error killing process ${childProcess.pid}:`, err);
+  //         }
+  //         resolve(true);
+  //       });
+  //     })
+  //   )
+  // );
+
+  // if (processes.length === 0) {
+  //   return;
+  // }
+
+  // // Wait for 500ms to allow graceful shutdown
+  // await new Promise((resolve) => setTimeout(resolve, 500));
+
+  // // New processes array with only the processes that are still running
+  // processes = processes.filter((proc) => !proc.killed);
+
+  // if (processes.length === 0) {
+  //   return;
+  // }
+
   // Kill each process gracefully with SIGTERM
   await Promise.all(
     processes.map((childProcess) =>
@@ -98,10 +135,18 @@ async function killProcesses() {
   );
 
   // Wait for 500ms to allow graceful shutdown
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await sleep(500);
+
+  if (processes.length === 0) {
+    return;
+  }
 
   // New processes array with only the processes that are still running
   processes = processes.filter((proc) => !proc.killed);
+
+  if (processes.length === 0) {
+    return;
+  }
 
   // Force kill any remaining processes
   await Promise.all(
@@ -121,21 +166,22 @@ async function killProcesses() {
 
 let shuttingDown = false;
 async function shutdown() {
-  if (!shuttingDown) {
-    shuttingDown = true;
-    console.log('\nShutting down...');
-
-    // Close the watcher
-    watcher.close();
-
-    // Kill all running processes
-    await killProcesses();
+  if (shuttingDown) {
+    return;
   }
+  shuttingDown = true;
+  console.log('\nShutting down...');
+
+  // Close the watcher
+  watcher.close();
+
+  // Kill all running processes
+  await killProcesses();
 
   // Check if all processes have been killed
   if (processes.length > 0) {
     // Wait for 500ms to allow graceful shutdown
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await sleep(500);
 
     // Filter out processes that have already been killed
     processes = processes.filter((proc) => !proc.killed);
@@ -153,7 +199,7 @@ async function shutdown() {
   process.stdin.pause();
 
   // 100ms delay to allow console output to complete
-  await new Promise((resolve) => setTimeout(resolve, 100));
+  await sleep(100);
 }
 
 process.on('SIGINT', async () => { 
@@ -170,7 +216,7 @@ watcher.on('change', async (path) => {
   // Kill all running processes
   await killProcesses();
 
-  // Clear out old processes
+  // Clear out old processes (should be empty after killProcesses anyways)
   processes = [];
 
   // Start the app again

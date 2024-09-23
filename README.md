@@ -4,17 +4,19 @@ Starter template that incorporates a **Next.js** frontend with a **NestJS** back
 
 ## Description
 
-This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack application with server-side rendering (SSR) and API capabilities. The template is designed to provide a solid foundation for building applications with modern React features and Material UI components.
+This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack application in a single project. The template is designed to provide a solid foundation for building applications with modern React features and Material UI components.
 
 The current implementation includes example code for a dashboard and demonstrates how to integrate Material UI (MUI) v6 with Next.js and NestJS. It also shows how to properly configure client-side components using the `"use client"` directive required by Next.js for components that utilize React hooks or state.
+
+Next runs as first piece of Nest middleware. All Nest routes start with the `/api/` prefix, all other routes are handled by Next.
 
 ## Features
 
 - **Next.js Frontend**: A React-based frontend with server-side rendering, utilizing the Next.js app directory structure.
 - **NestJS Backend**: A robust backend framework for building scalable server-side applications.
 - **Material UI Integration**: Demonstrates how to integrate MUI v6 with Next.js, including theming and styled components.
-- **Client Components**: Proper usage of the `"use client"` directive in Next.js for client-side components.
 - **TypeScript**: Written entirely in TypeScript for type safety and better developer experience.
+- **Prisma ORM**: Prisma ORM enables working with your favorite database in an intuitive type-safe way.
 - **Testing Setup**: Configured with Jest for unit and integration testing.
 - **Linting and Formatting**: ESLint and Prettier are set up for code quality and consistency.
 
@@ -172,6 +174,4 @@ This project is **UNLICENSED**. See the [LICENSE](LICENSE) file for more details
 
 ## Conclusion
 
-This updated template provides a modern starting point for building full-stack applications with NestJS and Next.js, integrating Material UI components, and following best practices for client-side React development. It demonstrates how to properly configure and use client components in Next.js, especially when integrating with libraries like Material UI.
-
-Feel free to extend this template with additional features such as authentication, database integration, and more UI components.
+This updated template provides a modern starting point for building full-stack applications with NestJS and Next.js, integrating Material UI components, and following best practices for client-side React development.
