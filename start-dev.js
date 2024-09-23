@@ -38,35 +38,40 @@ async function startApp() {
   }
 }
 
-let shuttingDown = false;
-async function shutdown() {
-  if (shuttingDown) {
-    return;
+// Defines a one-shot shutdown function, using a closure to prevent multiple shutdown calls
+const shutdown = (() => {
+  // Flag to prevent multiple shutdowns
+  let shuttingDown = false;
+
+  return async function () {
+    if (shuttingDown) {
+      return;
+    }
+    shuttingDown = true;
+    console.log('\nShutting down...');
+
+    // Done with the raw mode
+    process.stdin.setRawMode(false); // Let's the user use the terminal again  
+    process.stdin.pause(); // Stop reading from stdin
+
+    // Close the watcher
+    watcher.close();
+
+    // Kill all running processes
+    await stopAllProcesses();
+
+    // Wait for all tracked promises to finish before exiting
+    await Promise.all(Array.from(activePromises));
+
+    // Check if all processes have been killed
+    if (processes.length > 0) {
+      console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
+    }
+    
+    // Exit the process
+    process.exit();
   }
-  shuttingDown = true;
-  console.log('\nShutting down...');
-
-  // Done with the raw mode
-  process.stdin.setRawMode(false); // Let's the user use the terminal again  
-  process.stdin.pause(); // Stop reading from stdin
-
-  // Close the watcher
-  watcher.close();
-
-  // Kill all running processes
-  await stopAllProcesses();
-
-  // Wait for all tracked promises to finish before exiting
-  await Promise.all(Array.from(activePromises));
-
-  // Check if all processes have been killed
-  if (processes.length > 0) {
-    console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
-  }
-  
-  // Exit the process
-  process.exit();
-}
+})();
 
 // Handle SIGINT signal by calling shutdown function, normally this is handled by the readline interface
 process.on('SIGINT', async () => { 
