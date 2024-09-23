@@ -122,7 +122,6 @@ async function shutdown() {
   }
   shuttingDown = true;
   console.log('\nShutting down...');
-  process.stdin.setRawMode(false); // Let's the user use the terminal again
 
   // Close the watcher
   watcher.close();
@@ -139,7 +138,7 @@ async function shutdown() {
   await Promise.all(Array.from(activePromises));
 
   // Stop reading from stdin
-  // process.stdin.setRawMode(false); // TTY mode
+  process.stdin.setRawMode(false); // Let's the user use the terminal again
   process.stdin.pause();
 
   // 100ms delay to allow console output to complete
