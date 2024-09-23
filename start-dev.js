@@ -73,7 +73,8 @@ const shutdown = (() => {
   }
 })();
 
-// Handle SIGINT signal by calling shutdown function, normally this is handled by the readline interface
+// Handle SIGINT signal by calling shutdown function
+// Note: Ctrl-c is normally handled by the readline interface
 process.on('SIGINT', async () => { 
   await shutdown();
 });
