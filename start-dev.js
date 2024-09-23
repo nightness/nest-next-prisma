@@ -64,11 +64,6 @@ async function shutdown() {
     console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
   }
   
-  // 100ms delay to allow console output to complete
-  await sleep(100);
-
-  console.log('Shutdown complete.');
-
   // Exit the process
   process.exit();
 }
