@@ -111,6 +111,13 @@ async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Helper function to create a generator that sleeps for a given number of milliseconds
+async function* sleepGenerator(ms, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    yield sleep(ms);
+  }
+}
+
 // Helper function to compile the app
 async function compile() {
   return spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']);
@@ -126,8 +133,11 @@ async function stopAllProcesses() {
   // Send SIGTERM to all running child processes
   await signalAllProcesses('SIGTERM');
 
-  // Wait for 500ms to allow graceful shutdown
-  await sleep(500);
+  // Wait for all processes to exit
+  for await (const result of sleepGenerator(100, 5)) {
+    if (processes.length === 0)
+      break;
+  }
 
   // Send SIGKILL to all running child processes
   await signalAllProcesses('SIGKILL');
