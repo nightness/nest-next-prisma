@@ -65,11 +65,11 @@ async function sleep(ms) {
 
 // Helper function to compile the app
 async function compile() {
-  return trackPromise(spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']));
+  return spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']);
 }
 
 async function startServer() {
-  return await trackPromise(spawnProcess('node', ['.nest/src/main.js']));
+  return await spawnProcess('node', ['.nest/src/main.js']);
 }
 
 // Start the app
@@ -82,78 +82,29 @@ async function startApp() {
   }
 }
 
-async function killProcesses() {
-  // Filter out processes that have already been killed
-  processes = processes.filter((proc) => !proc.killed);
-
-  if (processes.length === 0) {
-    return;
-  }
-
-  // // Kill each process gracefully with SIGINT
-  // await Promise.all(
-  //   processes.map((childProcess) =>
-  //     new Promise((resolve) => {
-  //       // console.log(`Killing process ${childProcess.pid}`);
-  //       kill(childProcess.pid, 'SIGINT', (err) => {
-  //         if (err) {
-  //           console.error(`Error killing process ${childProcess.pid}:`, err);
-  //         }
-  //         resolve(true);
-  //       });
-  //     })
-  //   )
-  // );
-
-  // if (processes.length === 0) {
-  //   return;
-  // }
-
-  // // Wait for 500ms to allow graceful shutdown
-  // await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // // New processes array with only the processes that are still running
-  // processes = processes.filter((proc) => !proc.killed);
-
-  // if (processes.length === 0) {
-  //   return;
-  // }
-
-  // Kill each process gracefully with SIGTERM
-  await Promise.all(
-    processes.map((childProcess) =>
-      new Promise((resolve) => {
-        // console.log(`Killing process ${childProcess.pid}`);
-        kill(childProcess.pid, 'SIGTERM', (err) => {
-          if (err) {
-            console.error(`Error killing process ${childProcess.pid}:`, err);
-          }
-          resolve(true);
-        });
-      })
-    )
-  );
+async function stopAllProcesses() {
+  // Send SIGTERM to all running child processes
+  await signalAllProcesses('SIGTERM');
 
   // Wait for 500ms to allow graceful shutdown
   await sleep(500);
 
-  if (processes.length === 0) {
-    return;
-  }
+  // Send SIGKILL to all running child processes
+  await signalAllProcesses('SIGKILL');
+}
 
+async function signalAllProcesses(signal) {
   // New processes array with only the processes that are still running
-  processes = processes.filter((proc) => !proc.killed);
+  processes = processes.filter((proc) => !proc.killed || proc.exitCode === null);
 
   if (processes.length === 0) {
     return;
   }
 
-  // Force kill any remaining processes
   await Promise.all(
     processes.map((childProcess) =>
       new Promise((resolve) => {
-        // console.log(`Force killing process ${childProcess.pid}`);
-        kill(childProcess.pid, 'SIGKILL', (err) => {
+        kill(childProcess.pid, signal, (err) => {
           if (err) {
             console.error(`Error force killing process ${childProcess.pid}:`, err);
           }
@@ -171,24 +122,17 @@ async function shutdown() {
   }
   shuttingDown = true;
   console.log('\nShutting down...');
+  process.stdin.setRawMode(false); // Let's the user use the terminal again
 
   // Close the watcher
   watcher.close();
 
   // Kill all running processes
-  await killProcesses();
+  await stopAllProcesses();
 
   // Check if all processes have been killed
   if (processes.length > 0) {
-    // Wait for 500ms to allow graceful shutdown
-    await sleep(500);
-
-    // Filter out processes that have already been killed
-    processes = processes.filter((proc) => !proc.killed);
-    if (processes.length > 0) {
-      console.error('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
-      // process.exit(1);
-    }
+    console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
   }
 
   // Wait for all tracked promises to finish before exiting
@@ -214,7 +158,7 @@ watcher.on('change', async (path) => {
   console.log(`${path} has been changed. Restarting app...`);
 
   // Kill all running processes
-  await killProcesses();
+  await stopAllProcesses();
 
   // Clear out old processes (should be empty after killProcesses anyways)
   processes = [];
