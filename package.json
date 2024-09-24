@@ -34,6 +34,7 @@
     "@nestjs/core": "^10.4.1",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/serve-static": "^4.0.2",
+    "@nestjs/swagger": "^7.4.2",
     "@react-spring/web": "^9.7.4",
     "babel-loader": "^9.2.1",
     "class-transformer": "^0.5.1",

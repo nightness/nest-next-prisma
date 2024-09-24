@@ -8,7 +8,7 @@ import Next from 'next';
 import { AppModule } from './app.module';
 import configApp from './config/config.app';
 import configSecurityPolicy from './config/config.security';
-// import configSwagger from './config/config.swagger';
+import configSwagger from './config/config.swagger';
 import * as nextConfig from '../next.config.js';
 
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
@@ -21,9 +21,12 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Set global prefix for API routes
   app.setGlobalPrefix('api');
 
+  // Config Security Policy
+  configSecurityPolicy(app);
+
   // Middleware to handle Next.js routing
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.url.startsWith('/api')) {
+    if (req.url.startsWith('/api') || req.url.startsWith('/swagger') || req.url.startsWith('/css')) {
       return next();
     }
     return handle(req, res);
@@ -32,11 +35,8 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Config App
   const listen = configApp(app);
 
-  // Config Security Policy
-  configSecurityPolicy(app);
-
   // Config Swagger
-  // configSwagger(app);
+  configSwagger(app);
 
   // Listen for connections
   listen().then(() => {
