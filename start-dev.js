@@ -1,3 +1,33 @@
+/**
+ * Script for automatic recompilation and server restart upon file changes.
+ *
+ * Overview:
+ * - Watches the './src' directory for any file changes using 'chokidar'.
+ * - On detecting a change:
+ *   - Compiles TypeScript files using 'tsc' with the 'tsconfig.server.json' configuration, outputting to the '.nest' directory.
+ *   - Restarts the Node.js server by running the compiled JavaScript files.
+ * - Manages child processes to ensure only one instance of the server runs at a time.
+ * - Handles graceful shutdown on 'Ctrl+C' or 'SIGINT', ensuring all child processes are terminated.
+ * - Prevents multiple shutdowns using a closure to manage the shutdown state.
+ * - Uses 'readline' to capture keypress events and override default terminal behavior.
+ *
+ * Key Features:
+ * - **File Watching**: Monitors source files for changes and triggers recompilation and restart.
+ * - **Process Management**: Keeps track of spawned processes and ensures clean termination.
+ * - **Graceful Shutdown**: Listens for interrupt signals to perform a controlled shutdown.
+ * - **Cross-Platform Compatibility**: Uses polling in 'chokidar' for better support on various file systems and environments.
+ *
+ * Usage:
+ * - Run this script during development to automatically rebuild and restart your server when you make changes to the source code.
+ * - Customize the paths and commands if your project structure differs.
+ *
+ * Dependencies:
+ * - **chokidar**: For efficient file system watching.
+ * - **child_process.spawn**: To execute shell commands for compilation and server start.
+ * - **tree-kill**: To terminate processes and their child processes.
+ * - **readline**: To handle input from the terminal.
+ */
+
 const chokidar = require('chokidar');
 const { spawn } = require('child_process');
 const kill = require('tree-kill');
@@ -112,7 +142,7 @@ async function sleep(ms) {
 }
 
 // Helper function to create a generator that sleeps for a given number of milliseconds
-async function* sleepGenerator(ms, retries = 3) {
+async function* asleep(ms, retries = 3) {
   for (let i = 0; i < retries; i++) {
     yield sleep(ms);
   }
@@ -133,14 +163,16 @@ async function stopAllProcesses() {
   // Send SIGTERM to all running child processes
   await signalAllProcesses('SIGTERM');
 
-  // Wait for all processes to exit
-  for await (const result of sleepGenerator(100, 5)) {
+  // Wait for all processes to exit, this is a retry mechanism
+  for await (const result of asleep(100, 5)) {
     if (processes.length === 0)
       break;
   }
 
-  // Send SIGKILL to all running child processes
-  await signalAllProcesses('SIGKILL');
+  // Send SIGKILL to all hung child processes
+  if (processes.length > 0) {
+    await signalAllProcesses('SIGKILL');
+  }
 }
 
 // Helper function to send a signal to all running processes
