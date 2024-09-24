@@ -220,7 +220,7 @@ function spawnProcess(command, args, options = {}) {
     childProcess.on('close', (code, signal) => {
       // Remove the child process from the list of running processes
       processes = processes.filter((p) => p !== childProcess);
-      resolve(code, signal);
+      resolve({ code, signal });
     });
 
     childProcess.on('error', (err) => {

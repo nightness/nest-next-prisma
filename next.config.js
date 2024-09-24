@@ -1,5 +1,11 @@
 // next.config.js
-module.exports = {
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV !== 'production',
+});
+
+// next.config.js
+module.exports = withPWA({
   reactStrictMode: true,
   // webpack: (config) => {
   //   // Exclude @mui and @emotion from being transpiled by SWC
@@ -28,4 +34,4 @@ module.exports = {
 
   //   return config;
   // },
-};
+});

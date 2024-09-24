@@ -14,7 +14,7 @@ import * as nextConfig from '../next.config.js';
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Setup Next.js
   const dev = process.env.NODE_ENV !== 'production';
-  const nextApp = Next({ dev, conf: nextConfig, dir: './',  });
+  const nextApp = Next({ dev, conf: nextConfig, dir: './' });
   const handle = nextApp.getRequestHandler();
   await nextApp.prepare();
 
