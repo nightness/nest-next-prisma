@@ -8,8 +8,8 @@ import { AppController } from './app.controller';
   imports: [
     // Configure ServeStaticModule to serve the Next.js /public folder
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // path to your /public folder
-      serveRoot: '/public', // optional, this defines the route for accessing the public assets
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public',
     }),
   ],  
   controllers: [AppController],
