@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListSubheader from '@mui/material/ListSubheader';
 import Select, { SelectChangeEvent, selectClasses } from '@mui/material/Select';
 import Divider from '@mui/material/Divider';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';

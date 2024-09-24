@@ -11,7 +11,7 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import SideMenuMobile from './SideMenuMobile';
 import MenuButton from './MenuButton';
 
-import { styled } from '@mui/system';
+import { styled } from '@mui/material';
 import Toolbar from '@mui/material/Toolbar';
 
 
