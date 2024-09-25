@@ -11,6 +11,7 @@
     "start": "node dist/main.js",
     "clean": "rm -rf dist",
     "clean:cache": "rm -rf .next .nest",
+    "clean:all": "rm -rf dist .next .nest",
     "purge": "rm -rf node_modules dist .next .nest yarn.lock package-lock.json pnpm-lock.yaml",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
