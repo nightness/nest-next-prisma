@@ -18,13 +18,7 @@ export default function setupSwagger(app: NestExpressApplication) {
     )
     .addSecurityRequirements('JWT-auth'); // Apply the security requirement globally
 
-  // Comma separated list of tags
-  const tags = process.env.SWAGGER_TAGS?.split(',') || [];
-  tags.forEach((tag) => {
-    builder = builder.addTag(tag);
-  });
   const options = builder.build();
-
   const swaggerDoc = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('/swagger', app, swaggerDoc);
 }
