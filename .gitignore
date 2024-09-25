@@ -1,4 +1,9 @@
+# Dev runtime
 .nest
+
+# PWA files
+public/sw.js
+public/workbox-*.js
 
 # compiled output
 dist
