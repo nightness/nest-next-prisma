@@ -67,7 +67,7 @@ const watcher = (function () {
   }
 
   // Initialize watcher.
-  const watcher = chokidar.watch('./src', {    
+  const watcher = chokidar.watch('./src', {
     persistent: true,
     ignoreInitial: true,
     usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
@@ -80,7 +80,7 @@ const watcher = (function () {
     // Kill all running processes
     await stopAllProcesses();
 
-    // Clear out old processes (should be empty after killProcesses anyways)
+    // Clear out old processes (should be empty after stopAllProcesses anyways)
     processes = [];
 
     // Start the app again
@@ -94,11 +94,10 @@ const watcher = (function () {
 
 async function startApp() {
   if (process.env.NODE_ENV === 'production') {
-    return startProduction();
+    return trackPromise(startProduction());
   } else {
-    return startDev();
+    return trackPromise(startDev());
   }
-
 }
 
 // Start the app
@@ -113,22 +112,20 @@ async function startDev() {
 
 // Start the app
 async function startProduction() {
-  return trackPromise(
-    new Promise(async (resolve, reject) => {
-      try {
-        const { code } = await startServer();
-        if (code !== 0) {
-          console.error(`Process exited with code ${code}. Restarting...`);
-          await sleep(1000); // Wait a bit before restarting
-          startApp(); // Restart the server
-        }
-      } catch (error) {
-        console.error('Error during app execution:', error.message);
-      } finally {
-        resolve();
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { code } = await startServer();
+      if (code !== 0) {
+        console.error(`Process exited with code ${code}. Restarting...`);
+        await sleep(1000); // Wait a bit before restarting
+        startApp(); // Restart the server
       }
-    })
-  );
+    } catch (error) {
+      console.error('Error during app execution:', error.message);
+    } finally {
+      resolve();
+    }
+  });
 }
 
 // Defines a one-shot shutdown function, using a closure to prevent multiple shutdown calls
@@ -160,7 +157,7 @@ const shutdown = (() => {
     if (processes.length > 0) {
       console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
     }
-    
+
     // Exit the process
     process.exit();
   }
@@ -168,13 +165,13 @@ const shutdown = (() => {
 
 // Handle SIGINT signal by calling shutdown function
 // Note: Ctrl-c is normally handled by the readline interface
-process.on('SIGINT', async () => { 
+process.on('SIGINT', async () => {
   await shutdown();
 });
 
 (async function main() {
   // Start the app
-  console.log('Starting app...');
+  console.log(watch ? 'Watching for file changes...' : 'Starting app...');
   try {
     await trackPromise(startApp())
   } catch (error) {
@@ -185,7 +182,7 @@ process.stdin.resume(); // Keep the process alive
 
 /*********************************************************************** */
 /*  End of control flow, the remaining code contains helper functions    */
-/*********************************************************************** */ 
+/*********************************************************************** */
 
 // Helper function to sleep for a given number of milliseconds
 async function sleep(ms) {
@@ -255,7 +252,7 @@ async function signalAllProcesses(signal) {
 // Helper function to track promises
 function trackPromise(promise) {
   if (!promise || typeof promise.finally !== 'function') {
-      throw new Error('trackPromise expects a Promise as an argument.');
+    throw new Error('trackPromise expects a Promise as an argument.');
   }
   activePromises.add(promise);
   promise.finally(() => activePromises.delete(promise));
