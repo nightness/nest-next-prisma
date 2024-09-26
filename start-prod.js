@@ -1,15 +1,15 @@
 /**
- * Production startup script that runs the server from the '/dist' directory.
+ * Production startup script that runs the server from the '/.nest' directory.
  *
  * Features:
- * - Starts the Node.js server from the compiled files in '/dist'.
+ * - Starts the Node.js server from the compiled files in '/.nest'.
  * - Automatically restarts the server if it crashes.
  * - Handles graceful shutdown on 'Ctrl+C' or 'SIGINT', ensuring all child processes are terminated.
  * - Reuses functions from 'start-dev.js' for process management and shutdown handling.
  *
  * Usage:
  * - Run this script to start your application in production mode.
- * - Ensure that your application is built and the output is in the '/dist' directory before running.
+ * - Ensure that your application is built and the output is in the '/.nest' directory before running.
  */
 
 const { spawn } = require('child_process');
@@ -144,7 +144,7 @@ async function* asleep(ms, retries = 3) {
 
 // Helper function to start the server
 function startServer() {
-  return spawnProcess('node', ['dist/src/main.js'], { stdio: 'inherit' });
+  return spawnProcess('node', ['.nest/src/main.js'], { stdio: 'inherit' });
 }
 
 // Helper function to stop all running processes

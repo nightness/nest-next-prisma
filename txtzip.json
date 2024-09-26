@@ -3,11 +3,12 @@
     "source-only": true,
     "exclude": [
         "components/**",
-        "components/*/**",
-        "lib/*/**",
-        "prisma/*/**",
+        "components/**/**",
+        "lib/**/**",
+        "prisma/**/**",
         "src/config/**",
         "src/**/*.spec.ts",
-        "app/**/*"
+        "app/**/**",
+        "public/**/**"
     ]
 }

@@ -1,14 +1,15 @@
-# Dev runtime
+# next.js
+.next
+
+# nest.js
 .nest
 
 # PWA files
 public/sw.js
 public/workbox-*.js
 
-# compiled output
-dist
+# Next.js build output
 node_modules
-build
 
 # Logs
 logs
@@ -73,13 +74,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
 # misc
 .DS_Store
 *.pem
@@ -105,9 +99,6 @@ node_modules/
 # Next.js build output
 .next/
 out/
-
-# NestJS build output
-dist/
 
 # TypeScript
 *.tsbuildinfo

@@ -15,7 +15,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
-  { ignores: ["node_modules", "dist", ".next"] },
+  { ignores: ["node_modules", ".nest", ".next"] },
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
