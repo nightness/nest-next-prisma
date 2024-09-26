@@ -2,8 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": ".nest",
-    // "module": "esnext",
-    "declaration": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "declaration": false,
     "noEmit": false,
     "removeComments": true
   },
@@ -16,7 +17,7 @@
     "**/*spec.ts",
     "**/*.test.ts",
     ".next",
-    "pages",
+    ".nest",
     "app"
   ]
 }

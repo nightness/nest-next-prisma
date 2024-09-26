@@ -58,14 +58,43 @@ const watcher = chokidar.watch('./src', {
   usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
 });
 
-// Start the app
 async function startApp() {
+  if (process.env.NODE_ENV === 'production') {
+    return startProduction();
+  } else {
+    return startDev();
+  }
+
+}
+
+// Start the app
+async function startDev() {
   try {
     await compile();
     await startServer()
   } catch (error) {
     console.error('Error during app execution:', error.message);
   }
+}
+
+// Start the app
+async function startProduction() {
+  return trackPromise(
+    new Promise(async (resolve, reject) => {
+      try {
+        const { code } = await startServer();
+        if (code !== 0) {
+          console.error(`Process exited with code ${code}. Restarting...`);
+          await sleep(1000); // Wait a bit before restarting
+          startApp(); // Restart the server
+        }
+      } catch (error) {
+        console.error('Error during app execution:', error.message);
+      } finally {
+        resolve();
+      }
+    })
+  );
 }
 
 // Defines a one-shot shutdown function, using a closure to prevent multiple shutdown calls
@@ -135,6 +164,10 @@ watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
   }
 })();
 process.stdin.resume(); // Keep the process alive
+
+/*********************************************************************** */
+/*  End of control flow, the remaining code contains helper functions    */
+/*********************************************************************** */ 
 
 // Helper function to sleep for a given number of milliseconds
 async function sleep(ms) {
