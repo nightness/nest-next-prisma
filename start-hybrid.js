@@ -192,9 +192,12 @@ async function startServer() {
 }
 
 // Helper function to stop all running processes
-async function stopAllProcesses() {
-  // Send SIGTERM to all running child processes
-  await signalAllProcesses('SIGTERM');
+async function stopAllProcesses(signals = ['SIGINT', 'SIGTERM', 'SIGKILL']) {
+  // Get the first signal to use
+  const signal = signals.shift();
+
+  // Attempt to shutdown all processes using this signal
+  await signalAllProcesses(signal);
 
   // Wait for all processes to exit, this is a retry mechanism
   for await (const result of asleep(100, 5)) {
@@ -202,9 +205,9 @@ async function stopAllProcesses() {
       break;
   }
 
-  // Send SIGKILL to all hung child processes
-  if (processes.length > 0) {
-    await signalAllProcesses('SIGKILL');
+  // If there are still processes running, try the next signal
+  if (processes.length > 0 && signals.length > 0) {
+    await stopAllProcesses(signals);
   }
 }
 

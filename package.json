@@ -6,8 +6,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "node start-hybrid.js",
     "build": "rm -rf .nest .next && tsc -p tsconfig.build.json && next build",
+    "start": "node start-hybrid.js",
     "start:nest": "node .nest/src/main.js",
     "start:next": "next start",
     "clean": "rm -rf .next .nest",
