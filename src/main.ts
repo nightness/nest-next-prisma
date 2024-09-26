@@ -12,9 +12,12 @@ import configSwagger from './config/config.swagger';
 import * as nextConfig from '../next.config.js';
 import { HYBRID_ENV, NODE_ENV } from './config/config.env';
 
+// Since the default is true, we can disable the hybrid environment by passing the --no-hybrid flag
+const noHybrid = process.argv.includes('--no-hybrid');
+
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Enable the hybrid environment and run Next.js as middleware (defaults to true)
-  if (HYBRID_ENV === 'development') {
+  if (!noHybrid && HYBRID_ENV) {
     const dev = NODE_ENV !== 'production';
     const nextApp = Next({ dev, conf: nextConfig, dir: './' });
     const handle = nextApp.getRequestHandler();

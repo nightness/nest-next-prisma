@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rm -rf .nest .next && tsc -p tsconfig.build.json && next build",
     "start": "node start-hybrid.js",
-    "start:nest": "node .nest/src/main.js",
+    "start:nest": "node .nest/src/main.js --no-hybrid",
     "start:next": "next start",
     "clean": "rm -rf .next .nest",
     "purge": "rm -rf node_modules .next .nest yarn.lock package-lock.json pnpm-lock.yaml",
