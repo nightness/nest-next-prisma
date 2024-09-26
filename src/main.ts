@@ -15,6 +15,12 @@ import { HYBRID_ENV, NODE_ENV } from './config/config.env';
 // Since the default is true, we can disable the hybrid environment by passing the --no-hybrid flag
 const noHybrid = process.argv.includes('--no-hybrid');
 
+// Sanity check on arguments
+if (process.argv.length > 2 && !process.argv.includes('--no-hybrid')) {
+  console.error('Invalid argument. Use --no-hybrid to disable the hybrid environment.');
+  process.exit(1);
+}
+
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Enable the hybrid environment and run Next.js as middleware (defaults to true)
   if (!noHybrid && HYBRID_ENV) {
