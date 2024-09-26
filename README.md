@@ -16,6 +16,8 @@ Next runs as first piece of Nest middleware. All Nest routes start with the `/ap
 - **NestJS Backend**: A robust backend framework for building scalable server-side applications.
 - **Material UI Integration**: Demonstrates how to integrate MUI v6 with Next.js, including theming and styled components.
 - **TypeScript**: Written entirely in TypeScript for type safety and better developer experience.
+- **Hybrid Server**: Custom script to start Next.js as Nest middleware, allowing both servers to run together.
+- **Swagger API Documentation**: Automatically generated API documentation using Swagger (when using NestJS).
 - **Prisma ORM**: Prisma ORM enables working with your favorite database in an intuitive type-safe way.
 - **Testing Setup**: Configured with Jest for unit and integration testing.
 - **Linting and Formatting**: ESLint and Prettier are set up for code quality and consistency.
