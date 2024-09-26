@@ -1,5 +1,5 @@
-import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SERVER_PORT, SERVER_URL } from './config.env';
 
 export default function setupSecurityPolicy(app: NestExpressApplication) {
