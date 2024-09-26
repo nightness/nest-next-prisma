@@ -35,7 +35,6 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Config Security Policy
   configSecurityPolicy(app);
 
-
   // Config App
   const listen = configApp(app);
 
