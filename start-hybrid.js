@@ -1,5 +1,5 @@
 /**
- * Script for automatic recompilation and server restart upon file changes.
+ * Hybrid Development Server
  *
  * Overview:
  * - Watches the './src' directory for any file changes using 'chokidar'.
@@ -39,6 +39,15 @@ let processes = [];
 // Set to store all active promises
 const activePromises = new Set();
 
+// Check if the script is running in watch mode
+const watch = process.argv.includes('--watch');
+
+// Sanity check on arguments
+if (process.argv.length > 2 && !process.argv.includes('--watch')) {
+  console.error('Invalid argument. Use --watch to start the script in watch mode.');
+  process.exit(1);
+}
+
 // Create a readline interface
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
@@ -51,12 +60,37 @@ process.stdin.on('keypress', (str, key) => {
   }
 });
 
-// Initialize watcher.
-const watcher = chokidar.watch('./src', {
-  persistent: true,
-  ignoreInitial: true,
-  usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
-});
+// Watch the 'src' directory for changes.
+const watcher = (function () {
+  if (!watch) {
+    return;
+  }
+
+  // Initialize watcher.
+  const watcher = chokidar.watch('./src', {    
+    persistent: true,
+    ignoreInitial: true,
+    usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
+  });
+
+  // Event listeners for when files change
+  watcher.on('change', async (path) => {
+    console.log(`${path} has been changed. Restarting app...`);
+
+    // Kill all running processes
+    await stopAllProcesses();
+
+    // Clear out old processes (should be empty after killProcesses anyways)
+    processes = [];
+
+    // Start the app again
+    startApp();
+  });
+
+  watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
+
+  return watcher;
+})();
 
 async function startApp() {
   if (process.env.NODE_ENV === 'production') {
@@ -113,8 +147,8 @@ const shutdown = (() => {
     process.stdin.setRawMode(false); // Let's the user use the terminal again  
     process.stdin.pause(); // Stop reading from stdin
 
-    // Close the watcher
-    watcher.close();
+    // Close the watcher if it exists
+    watcher?.close();
 
     // Kill all running processes
     await stopAllProcesses();
@@ -137,22 +171,6 @@ const shutdown = (() => {
 process.on('SIGINT', async () => { 
   await shutdown();
 });
-
-// Event listeners for when files change
-watcher.on('change', async (path) => {
-  console.log(`${path} has been changed. Restarting app...`);
-
-  // Kill all running processes
-  await stopAllProcesses();
-
-  // Clear out old processes (should be empty after killProcesses anyways)
-  processes = [];
-
-  // Start the app again
-  startApp();
-});
-
-watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
 
 (async function main() {
   // Start the app
