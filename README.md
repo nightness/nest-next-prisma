@@ -87,7 +87,7 @@ npm start
 ├── tsconfig.server.json    # TypeScript configuration for server-side code
 ├── eslint.config.mjs       # ESLint configuration
 ├── .prettierrc             # Prettier configuration
-└── start-dev.js            # Custom development server script
+└── start-hybrid.js         # Custom script to start the hybrid server
 ```
 
 ## Available Scripts
@@ -170,7 +170,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Notes
 
 - **No Nodemon**: The project does **not** use Nodemon. Hot reloading is handled by Next.js during development and a custom Nest server run script.
-- **Development Server**: A custom script `start-dev.js` is used to start the development server and watch for changes.
+- **Development Server**: A custom script `start-hybrid.js` is used to start the development server and watch for changes.
 
 ## Conclusion
 

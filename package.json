@@ -6,10 +6,10 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "node start-dev.js",
+    "dev": "node start-hybrid.js",
     "build": "tsc -p tsconfig.build.json && next build",
-    "start:old": "node .nest/src/main.js",
-    "start": "next start",
+    "start:nest": "node .nest/src/main.js",
+    "start:next": "next start",
     "clean": "rm -rf .next .nest",
     "purge": "rm -rf node_modules .next .nest yarn.lock package-lock.json pnpm-lock.yaml",
     "lint": "eslint .",
