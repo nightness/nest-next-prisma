@@ -5,7 +5,7 @@
 
 // app/page.tsx
 import React from 'react';
-import Dashboard from './_features/mui-free-examples/dashboard/Dashboard';
+import Dashboard from '@/features/mui-free-examples/dashboard/Dashboard';
 
 export default async function HomePage() {
   return (
