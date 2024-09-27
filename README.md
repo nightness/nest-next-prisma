@@ -1,14 +1,12 @@
 # NestJS and Next.js Hybrid Starter Template
 
-Starter template that incorporates a **Next.js** frontend with a **NestJS** backend.
+Starter template that incorporates a **Next.js** frontend with a **NestJS** backend, both sharing the same project structure and Prisma ORM schema. The template also adds a custom script to start Next as Nest middleware, allowing both servers to run as one server. The project includes Material UI components, TypeScript, Jest testing, and ESLint/Prettier setup.
 
 ## Description
 
-This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack application in a single project. The template is designed to provide a solid foundation for building applications with modern React features and Material UI components.
+This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack Progressive Web application in a single project around a shared Prisma ORM schema. The template is designed to provide a solid foundation for building applications with modern React features and Material UI components.
 
-The current implementation includes example code for a dashboard and demonstrates how to integrate Material UI (MUI) v6 with Next.js and NestJS. It also shows how to properly configure client-side components using the `"use client"` directive required by Next.js for components that utilize React hooks or state.
-
-Next runs as first piece of Nest middleware. All Nest routes start with the `/api/` prefix, all other routes are handled by Next.
+The project structure includes a `src/` directory for the NestJS backend and an `app/` directory for the Next.js (app router) frontend. The `start-hybrid.js` script allows both servers to run together. All Nest routes start with the `/api/` prefix. Nest also handles the `/css/` and `/swagger/` prefixes, all other routes are handled by Next. These routes are also ignored by the PWA service worker.
 
 ## Features
 
@@ -63,7 +61,7 @@ npm start
 
 ```plaintext
 ├── app/                    # Next.js frontend application
-│   ├── _dashboard/         # Dashboard components
+│   ├── _dashboard/         # Dashboard component - Demo from Component for MUI examples
 │   │   ├── Dashboard.tsx
 │   │   └── components/
 │   │       ├── AppNavbar.tsx
