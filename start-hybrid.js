@@ -75,7 +75,7 @@ const watcher = (function () {
 
   // Event listeners for when files change
   watcher.on('change', async (path) => {
-    console.log(`${path} has been changed. Restarting app...`);
+    console.log(`'${path}' has been changed. Restarting app...`);
 
     // Kill all running processes
     await stopAllProcesses();
