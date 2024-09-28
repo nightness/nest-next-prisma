@@ -7,6 +7,7 @@ services:
       - redis
       - mysql
     # Use a custom command to wait for the MySQL service to be ready, then push the schema and start the app
+    # NOTE: Running in hybrid mode
     command: >
       sh -c "
         until nc -z mysql 3306;
