@@ -1,42 +1,37 @@
 # Stage 1: Build the application
 FROM node:18 AS builder
 WORKDIR /usr/src/app
-COPY . .
+
+# Copy package files and install dependencies
+COPY package*.json ./
+COPY prisma ./prisma/
 RUN npm install
 RUN npx prisma generate
-RUN npm run build:next
-RUN npm run build:nest
-# RUN npm run build
-# COPY --from=builder /usr/src/app/.nest ./
-# COPY --from=builder /usr/src/app/.next ./
-# COPY --from=builder /usr/src/app/prisma ./
-# COPY --from=builder /usr/src/app/package.* ./
-# COPY --from=builder /usr/src/app/next.* ./
-# COPY --from=builder /usr/src/app/postcss.config.mjs ./
-# COPY --from=builder /usr/src/app/tsconfig.* ./
-# COPY --from=builder /usr/src/app/.env ./
-# COPY --from=builder /usr/src/app/nest-cli.json ./
-# COPY --from=builder /usr/src/app/start-hybrid.js ./
 
+# Copy the rest of the source code
+COPY . .
+
+# Build both NestJS and Next.js applications
+RUN npm run build
 
 # Stage 2: Run the application
 FROM node:18
 WORKDIR /usr/src/app
-# COPY --from=builder /usr/src/app/.nest ./
-# COPY --from=builder /usr/src/app/.next ./
-# COPY --from=builder /usr/src/app/prisma ./
-# COPY --from=builder /usr/src/app/package.* ./
-# COPY --from=builder /usr/src/app/next.* ./
-# COPY --from=builder /usr/src/app/postcss.config.mjs ./
-# COPY --from=builder /usr/src/app/tsconfig.* ./
-# COPY --from=builder /usr/src/app/.env ./
-# COPY --from=builder /usr/src/app/nest-cli.json ./
-# COPY --from=builder /usr/src/app/start-hybrid.js ./
-COPY --from=builder /usr/src/app ./
+
+# Copy necessary files from the builder stage
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/.next ./.next
+COPY --from=builder /usr/src/app/.nest ./.nest
+COPY --from=builder /usr/src/app/prisma ./prisma
+COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/start-hybrid.js ./
 
 # Install netcat-openbsd
 RUN apt-get update && apt-get install -y netcat-openbsd
-COPY . .
-RUN npm install --omit=dev
+
+# Expose port
 EXPOSE 3000
-CMD ["node", "dist/main"]
+
+# Set the default command
+CMD ["node", "run start"]

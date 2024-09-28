@@ -22,7 +22,7 @@ export default function setupApp(app: NestExpressApplication) {
 
   const listen = async () => {
     // Listen for connections
-    const server = await app.listen(process.env.SERVER_PORT || 3000);
+    const server = await app.listen(process.env.SERVER_PORT || 3000, '0.0.0.0');
 
     // Use the server to handle shutdown
     server.on('close', onShutdown);

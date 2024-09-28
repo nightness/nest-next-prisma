@@ -2,7 +2,7 @@ services:
   app:
     build: .
     ports:
-      - '4545:7950'
+      - '3000:3000'
     depends_on:
       - redis
       - mysql
