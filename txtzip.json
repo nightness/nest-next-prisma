@@ -2,13 +2,19 @@
     "overwrite": true,
     "source-only": true,
     "exclude": [
+        "README.md",
         "components/**",
         "components/**/**",
+        "features/**/**",
         "lib/**/**",
         "prisma/**/**",
         "src/config/**",
         "src/**/*.spec.ts",
+        "src/auth/**/**",
+        "src/sse/**/**",
+        "src/system/**/**",
         "app/**/**",
+        "packages/**/**",
         "public/**/**"
     ]
 }
