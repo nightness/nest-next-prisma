@@ -48,17 +48,22 @@ if (process.argv.length > 2 && !process.argv.includes('--watch')) {
   process.exit(1);
 }
 
-// Create a readline interface
-readline.emitKeypressEvents(process.stdin);
-process.stdin.setRawMode(true);
+// Does the terminal support raw mode?
+const supportsRawMode = !!process.stdin.setRawMode
 
-// Prevent Ctrl+C from sending SIGINT to the process
-process.stdin.on('keypress', (str, key) => {
-  if (key.ctrl && key.name === 'c') {
-    // console.log('Ctrl+C was pressed, but it is disabled.');
-    shutdown();
-  }
-});
+if (supportsRawMode) {
+  // Create a readline interface
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+
+  // Prevent Ctrl+C from sending SIGINT to the process
+  process.stdin.on('keypress', (str, key) => {
+    if (key.ctrl && key.name === 'c') {
+      // console.log('Ctrl+C was pressed, but it is disabled.');
+      shutdown();
+    }
+  });
+}
 
 // Watch the 'src' directory for changes.
 const watcher = (function () {
@@ -140,9 +145,11 @@ const shutdown = (() => {
     shuttingDown = true;
     console.log('\nShutting down...');
 
-    // Done with the raw mode
-    process.stdin.setRawMode(false); // Let's the user use the terminal again  
-    process.stdin.pause(); // Stop reading from stdin
+    if (supportsRawMode) {
+      // Done with the raw mode
+      process.stdin.setRawMode(false); // Let's the user use the terminal again  
+      process.stdin.pause(); // Stop reading from stdin
+    }
 
     // Close the watcher if it exists
     watcher?.close();

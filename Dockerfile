@@ -4,6 +4,8 @@ WORKDIR /usr/src/app
 COPY . .
 RUN npm install
 RUN npx prisma generate
+RUN npm run build:next
+RUN npm run build:nest
 # RUN npm run build
 # COPY --from=builder /usr/src/app/.nest ./
 # COPY --from=builder /usr/src/app/.next ./
@@ -30,7 +32,7 @@ WORKDIR /usr/src/app
 # COPY --from=builder /usr/src/app/.env ./
 # COPY --from=builder /usr/src/app/nest-cli.json ./
 # COPY --from=builder /usr/src/app/start-hybrid.js ./
-COPY --from=builder /usr/src/app ../
+COPY --from=builder /usr/src/app ./
 
 # Install netcat-openbsd
 RUN apt-get update && apt-get install -y netcat-openbsd
