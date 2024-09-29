@@ -34,4 +34,4 @@ RUN apt-get update && apt-get install -y netcat-openbsd
 EXPOSE 3000
 
 # Set the default command
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

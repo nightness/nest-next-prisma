@@ -29,14 +29,16 @@
     "test:coverage": "jest --coverage",
     "docker:build": "docker build -t test-app .",
     "docker:clean": "docker system prune -af",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
     "docker:migrate": "docker exec -it $(docker ps -qf \"name=test-app\") npm run migrate",
+    "docker:up": "docker-compose up -d",
+    "docker:start": "docker-compose up --build",
+    "docker:start:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:down": "docker-compose down",
+    "docker:down:dev": "docker-compose -f docker-compose.dev.yml down",
     "docker:rebuild": "docker-compose up -d --build",
     "docker:restart": "docker-compose down && docker-compose up --build",
     "docker:shell": "docker exec -it $(docker ps -qf \"name=test-app\") /bin/sh",
-    "docker:start": "docker-compose up --build",
-    "docker:up": "docker-compose up -d"
+    "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
     "@emotion/cache": "^11.13.1",
