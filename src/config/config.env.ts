@@ -1,7 +1,7 @@
 export const SERVER_PORT = process.env.SERVER_PORT || "3000";
 export const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3000';
 export const NODE_ENV = process.env.NODE_ENV || 'development';
-export const HYBRID_ENV: boolean = !!process.env.HYBRID_ENV || true;
+export const HYBRID_ENV: boolean = process.env.HYBRID_ENV !== 'false'; // Default is true
 
 export const JWT_SECRET = process.env.JWT_PRIVATE_KEY || 'secret';
 export const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY || 'privateKey';

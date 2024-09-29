@@ -10,7 +10,7 @@ import configApp from './config/config.app';
 import configSecurityPolicy from './config/config.security';
 import configSwagger from './config/config.swagger';
 import * as nextConfig from '../next.config.js';
-import { HYBRID_ENV, NODE_ENV } from './config/config.env';
+import { HYBRID_ENV, NODE_ENV, SERVER_PORT } from './config/config.env';
 
 // Since the default is true, we can disable the hybrid environment by passing the --no-hybrid flag
 const noHybrid = process.argv.includes('--no-hybrid');
@@ -52,6 +52,6 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
 
   // Listen for connections
   listen().then(() => {
-    console.log(`> Ready on http://localhost:3000`);
+    console.log(`> Ready on http://localhost:${SERVER_PORT}`);
   });
 });
