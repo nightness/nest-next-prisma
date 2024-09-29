@@ -2,7 +2,6 @@
     "overwrite": true,
     "source-only": true,
     "exclude": [
-        "README.md",
         "components/**",
         "components/**/**",
         "features/**/**",

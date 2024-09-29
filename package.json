@@ -32,11 +32,8 @@
     "docker:migrate": "docker exec -it $(docker ps -qf \"name=test-app\") npm run migrate",
     "docker:up": "docker-compose up -d",
     "docker:start": "docker-compose up --build",
-    "docker:start:dev": "docker-compose -f docker-compose.dev.yml up --build",
-    "docker:down": "docker-compose down",
-    "docker:down:dev": "docker-compose -f docker-compose.dev.yml down",
-    "docker:rebuild": "docker-compose up -d --build",
-    "docker:restart": "docker-compose down && docker-compose up --build",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:down": "docker-compose down && docker-compose -f docker-compose.dev.yml down",
     "docker:shell": "docker exec -it $(docker ps -qf \"name=test-app\") /bin/sh",
     "docker:logs": "docker-compose logs -f"
   },
