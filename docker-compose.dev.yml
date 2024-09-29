@@ -25,7 +25,7 @@ services:
         # Use db push for development; for production, consider migrate deploy
         npx prisma db push;
         
-        npm run start;
+        npm run dev;
       "
     env_file:
       - .env.docker.dev # Load environment variables from an external file

@@ -22,9 +22,13 @@ if (process.argv.length > 2 && !process.argv.includes('--no-hybrid')) {
 }
 
 NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
+  // Check if we are in development mode
+  const dev = NODE_ENV !== 'production';
+
+  console.log(`> Starting server in ${dev ? 'development' : 'production'} mode`);
+
   // Enable the hybrid environment and run Next.js as middleware (defaults to true)
   if (!noHybrid && HYBRID_ENV) {
-    const dev = NODE_ENV !== 'production';
     const nextApp = Next({ dev, conf: nextConfig, dir: './' });
     const handle = nextApp.getRequestHandler();
     await nextApp.prepare();
