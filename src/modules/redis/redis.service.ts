@@ -33,7 +33,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         this.logger.error('Failed to subscribe to keyspace events', err);
         return;
       }
-      this.logger.log(`Subscribed to ${count} keyspace event channels.`);
+      this.logger.log(`Subscribed to ${count} keyspace event channel${count === 1 ? '' : 's'}.`);
     });
 
     // Handle incoming keyspace events
