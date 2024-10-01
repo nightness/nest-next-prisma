@@ -16,16 +16,11 @@
  * - **Process Management**: Keeps track of spawned processes and ensures clean termination.
  * - **Graceful Shutdown**: Listens for interrupt signals to perform a controlled shutdown.
  * - **Cross-Platform Compatibility**: Uses polling in 'chokidar' for better support on various file systems and environments.
+ * - **Prisma Integration**: Regenerates the Prisma client and pushes schema changes to the database.
  *
- * Usage:
- * - Run this script during development to automatically rebuild and restart your server when you make changes to the source code.
- * - Customize the paths and commands if your project structure differs.
- *
- * Dependencies:
- * - **chokidar**: For efficient file system watching.
- * - **child_process.spawn**: To execute shell commands for compilation and server start.
- * - **tree-kill**: To terminate processes and their child processes.
- * - **readline**: To handle input from the terminal.
+ * Notes:
+ * - Add the ability to disconnect the NextJS process during a restart, and reconnect it after the app is back up?
+ * 
  */
 
 const chokidar = require('chokidar');
@@ -63,6 +58,10 @@ if (supportsRawMode) {
       shutdown();
     }
   });
+} else {
+  // Inside the container, raw mode is not supported
+  // Telemetry opt-out Next.js... If not in a container, the user's preference will be used
+  process.env.NEXT_TELEMETRY_DISABLED = '1';
 }
 
 // Watch the 'src' directory for changes.
