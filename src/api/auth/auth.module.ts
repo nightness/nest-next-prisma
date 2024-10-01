@@ -8,9 +8,10 @@ import { AuthController } from './auth.controller';
 import { AuthMiddleware } from './auth.middleware';
 import { AuthService } from './auth.service';
 import { RedisService } from '../../modules/redis/redis.service';
+import { EjsService } from '../../modules/ejs/ejs.service';
 
 @Module({
-  providers: [AuthService, UserService, JwtService, PrismaService, RedisService],
+  providers: [AuthService, EjsService, UserService, JwtService, PrismaService, RedisService],
   controllers: [AuthController],
 })
 export class AuthModule {
