@@ -12,8 +12,8 @@ import { SseService } from './sse.service';
 import { catchError } from 'rxjs/operators';
 import { ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EventDto, EventType } from './sse.types';
-import { AuthenticatedUserGuard } from '../system/guards/authenticated.guard';
-import type { Request, Response } from '../system/types';
+import { AuthenticatedUserGuard } from '../../system/guards/authenticated.guard';
+import type { Request, Response } from '../../system/types';
 
 @Controller('sse')
 @ApiTags('sse')
