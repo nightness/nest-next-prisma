@@ -72,7 +72,7 @@ const watcher = (function () {
   }
 
   // Initialize watcher.
-  const watcher = chokidar.watch('./src', {
+  const watcher = chokidar.watch(['./src', './prisma', './public'], {
     persistent: true,
     ignoreInitial: true,
     usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
@@ -80,7 +80,32 @@ const watcher = (function () {
 
   // Event listeners for when files change
   watcher.on('change', async (path) => {
-    console.log(`'${path}' has been changed. Restarting app...`);
+    if (path === 'prisma/schema.prisma') {
+      // npx prisma generate
+      try {
+        console.log('Prisma schema has been changed. Regenerating Prisma client...');
+        await spawnProcess('npx', ['prisma', 'generate']);
+      } catch (error) {
+        console.error('Error generating Prisma client:', error.message);
+      }
+
+      // TODO: Determine if a migration is needed or just a push
+      // npx prisma migrate dev 
+      // ... or ...
+
+      // npx prisma db push
+      try {
+        console.log('Prisma schema has been changed. Pushing changes to the database...');
+        await spawnProcess('npx', ['prisma', 'db', 'push']);
+      } catch (error) {
+        console.error('Error pushing changes to the database:', error.message);
+      }
+
+      // Restart the app
+      console.log(`Restarting app...`);
+    } else {
+      console.log(`'${path}' has been changed. Restarting app...`);
+    }
 
     // Kill all running processes
     await stopAllProcesses();
