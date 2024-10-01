@@ -19,7 +19,7 @@
  * - **Prisma Integration**: Regenerates the Prisma client and pushes schema changes to the database.
  *
  * Notes:
- * - Add the ability to disconnect the NextJS process during a restart, and reconnect it after the app is back up.
+ * - Add the ability to disconnect the NextJS process during a restart, and reconnect it after the app is back up?
  * 
  */
 
@@ -60,7 +60,7 @@ if (supportsRawMode) {
   });
 } else {
   // Inside the container, raw mode is not supported
-  // Telemetry opt-out Next.js
+  // Telemetry opt-out Next.js... If not in a container, the user's preference will be used
   process.env.NEXT_TELEMETRY_DISABLED = '1';
 }
 
