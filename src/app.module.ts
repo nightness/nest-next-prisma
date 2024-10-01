@@ -3,13 +3,17 @@ import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from './auth/auth.module';
-import { SseModule } from './sse/sse.module';
-import { SystemModule } from './system/system.module';
+import { AuthModule } from './api/auth/auth.module';
+import { SseModule } from './modules/sse/sse.module';
 import { Algorithm } from 'jsonwebtoken';
 
 import { AppController } from './app.controller';
 import { JWT_ALGORITHM, JWT_PRIVATE_KEY, JWT_SECRET } from './config/config.env';
+import { RedisModule } from './modules/redis/redis.module';
+import { PrismaModule } from './modules/prisma/prisma.module';
+import { EjsModule } from './modules/ejs/ejs.module';
+import { EmailerModule } from './modules/emailer/emailer.module';
+import { FilesystemModule } from './modules/filesystem/filesystem.module';
 
 @Module({
   imports: [
@@ -29,10 +33,13 @@ import { JWT_ALGORITHM, JWT_PRIVATE_KEY, JWT_SECRET } from './config/config.env'
       },
     }),
     AuthModule,
-    SystemModule,
     SseModule,
+    RedisModule,
+    PrismaModule,
+    EjsModule,
+    EmailerModule,
+    FilesystemModule,
   ],  
   controllers: [AppController],
-  providers: [],
 })
 export class AppModule {}

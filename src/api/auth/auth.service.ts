@@ -9,13 +9,13 @@ import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 // Your custom JwtPayload interface
-import { ACCESS_TOKEN_EXPIRATION, EMAIL_VERIFICATION_TOKEN_EXPIRATION, MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS, MAX_CONCURRENT_PASSWORD_RESET_REQUESTS, MAX_REFRESH_TOKENS, PASSWORD_RESET_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION, SERVER_URL } from '../config/config.env';
-import { PrismaService } from '../system/services/prisma/prisma.service';
+import { ACCESS_TOKEN_EXPIRATION, EMAIL_VERIFICATION_TOKEN_EXPIRATION, MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS, MAX_CONCURRENT_PASSWORD_RESET_REQUESTS, MAX_REFRESH_TOKENS, PASSWORD_RESET_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION, SERVER_URL } from '../../config/config.env';
+import { PrismaService } from '../../modules/prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { EjsService } from '../system/services/ejs/ejs.service';
-import { EmailerService } from '../system/services/emailer/emailer.service';
-import { RedisService } from '../system/services/redis/redis.service';
-import { User as ExpressUser } from '../system/types';
+import { EjsService } from '../../modules/ejs/ejs.service';
+import { EmailerService } from '../../modules/emailer/emailer.service';
+import { RedisService } from '../../modules/redis/redis.service';
+import { User as ExpressUser } from '../../system/types';
 
 import { JwtPayload, LoginResponseDto } from './auth.types';
 

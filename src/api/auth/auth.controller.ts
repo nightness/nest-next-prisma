@@ -22,11 +22,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { DISABLE_REGISTRATION } from '../config/config.env';
-import { ControllerInfo } from '../system/decorators/controller-info/controller-info.decorator';
-import { HandlerInfo } from '../system/decorators/handler-info/handler-info.decorator';
-import { AuthenticatedUserGuard } from '../system/guards/authenticated.guard';
-import type { Request, Response } from '../system/types';
+import { DISABLE_REGISTRATION } from '../../config/config.env';
+import { ControllerInfo } from '../../system/decorators/controller-info/controller-info.decorator';
+import { HandlerInfo } from '../../system/decorators/handler-info/handler-info.decorator';
+import { AuthenticatedUserGuard } from '../../system/guards/authenticated.guard';
+import type { Request, Response } from '../../system/types';
 
 import { AuthService } from './auth.service';
 import {

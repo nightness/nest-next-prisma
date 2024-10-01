@@ -6,7 +6,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import Redis, { Redis as RedisClient } from 'ioredis';
-import { REDIS_HOST, REDIS_PORT } from '../../../config/config.env';
+import { REDIS_HOST, REDIS_PORT } from '../../config/config.env';
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {

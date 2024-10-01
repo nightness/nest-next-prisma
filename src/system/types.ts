@@ -3,7 +3,7 @@ import {
   Response as ExpressResponse,
 } from 'express';
 
-import { JwtPayload } from '../auth/auth.types';
+import { JwtPayload } from '../api/auth/auth.types';
 
 export interface User {
   id: string;

@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request, Response } from '../system/types';
+import { Request, Response } from '../../system/types';
 
 import { AuthService } from './auth.service';
 
