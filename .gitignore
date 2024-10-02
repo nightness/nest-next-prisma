@@ -113,3 +113,4 @@ logs/
 # Lock files
 yarn.lock
 package-lock.json
+pnpm-lock.yaml
