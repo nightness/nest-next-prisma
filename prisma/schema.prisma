@@ -17,7 +17,7 @@ model User {
   id              String  @id @default(uuid())
   email           String  @unique
   password        String
-  name            String?
+  name            String
   // Claims
   isAdmin         Boolean @default(false)
   isActive        Boolean @default(true)

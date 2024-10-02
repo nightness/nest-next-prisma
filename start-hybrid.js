@@ -88,14 +88,10 @@ const watcher = (function () {
         console.error('Error generating Prisma client:', error.message);
       }
 
-      // TODO: Determine if a migration is needed or just a push
-      // npx prisma migrate dev 
-      // ... or ...
-
       // npx prisma db push
       try {
         console.log('Prisma schema has been changed. Pushing changes to the database...');
-        await spawnProcess('npx', ['prisma', 'db', 'push']);
+        await spawnProcess('npx', ['prisma', 'db', 'push', '--force-reset']);
       } catch (error) {
         console.error('Error pushing changes to the database:', error.message);
       }
@@ -133,6 +129,7 @@ async function startApp() {
 async function startDev() {
   try {
     await compile();
+    await seedPrisma();
     await startServer()
   } catch (error) {
     console.error('Error during app execution:', error.message);
@@ -230,6 +227,11 @@ async function* asleep(ms, retries = 3) {
 // Helper function to compile the app
 async function compile() {
   return spawnProcess('tsc', ['--project', 'tsconfig.server.json', '--outDir', '.nest']);
+}
+
+// Helper function to seed the database
+async function seedPrisma() {
+  return spawnProcess('npx', ['prisma', 'db', 'seed']);
 }
 
 // Helper function to start the server

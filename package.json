@@ -24,6 +24,7 @@
     "prisma:generate": "npx prisma generate",
     "prisma:push": "npx prisma db push",
     "prisma:studio": "npx prisma studio",
+    "prisma:seed": "ts-node --transpile-only prisma/seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -34,7 +35,7 @@
     "docker:start": "docker-compose up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:down": "docker-compose down && docker-compose -f docker-compose.dev.yml down",
-    "docker:shell": "docker exec -it $(docker ps -qf \"name=test-app\") /bin/sh",
+    "docker:shell": "docker exec -it test-app-1 /bin/sh",
     "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
@@ -130,9 +131,13 @@
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "5.4.3",
     "typescript-eslint": "^8.5.0",
     "webpack": "^5.94.0"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
