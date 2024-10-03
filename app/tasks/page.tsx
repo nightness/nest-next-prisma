@@ -42,7 +42,6 @@ export default function TasksPage() {
   };
 
   const deleteTask = async (id: string) => {
-    console.log('deleteTask', id);
     await fetch(`/api/tasks/${id}`, {
       method: 'DELETE',
     });
