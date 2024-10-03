@@ -113,11 +113,16 @@ npm start
 ├── app/                    # Next.js frontend
 │   ├── page.tsx            # Home page
 │   ├── layout.tsx          # Root layout
-│   ├── globals.css         # Global styles
+│   ├── styles.module.css   # Global styles
+│   ├── not-found.tsx       # 404 page
+│   ├── loading.tsx         # Loading spinner
+│   ├── error.tsx           # Error page
+│   └── ...                 # Additional pages and components
 ├── src/                    # NestJS backend
 │   ├── app.controller.ts   # Main controller
 │   ├── app.module.ts       # Main module
 │   ├── main.ts             # Application entry point
+│   └── config/...          # Configuration files
 ├── prisma/                 # Prisma schema and migrations
 ├── docker-compose.yml      # Production Docker configuration
 ├── docker-compose.dev.yml  # Development Docker configuration
