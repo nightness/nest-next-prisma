@@ -23,3 +23,12 @@ model User {
   isActive        Boolean @default(true)
   isEmailVerified Boolean @default(false)
 }
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -3,10 +3,9 @@ import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from './api/auth/auth.module';
-import { SseModule } from './modules/sse/sse.module';
 import { Algorithm } from 'jsonwebtoken';
 
+import { SseModule } from './modules/sse/sse.module';
 import { AppController } from './app.controller';
 import { JWT_ALGORITHM, JWT_PRIVATE_KEY, JWT_SECRET } from './config/config.env';
 import { RedisModule } from './modules/redis/redis.module';
@@ -15,6 +14,8 @@ import { EjsModule } from './modules/ejs/ejs.module';
 import { EmailerModule } from './modules/emailer/emailer.module';
 import { FilesystemModule } from './modules/filesystem/filesystem.module';
 
+import { AuthModule } from './api/auth/auth.module';
+import { TasksModule } from './api/tasks/tasks.module';
 @Module({
   imports: [
     // Configure ServeStaticModule to serve the Next.js /public folder
@@ -39,6 +40,7 @@ import { FilesystemModule } from './modules/filesystem/filesystem.module';
     EjsModule,
     EmailerModule,
     FilesystemModule,
+    TasksModule,
   ],  
   controllers: [AppController],
 })

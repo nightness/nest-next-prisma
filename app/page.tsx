@@ -78,6 +78,8 @@ export default function HomePage() {
         <Link href="/api/hello">Visit API Endpoint</Link>
         {' | '}
         <Link href="/swagger">View Swagger Docs</Link>
+        {' | '}
+        <Link href="/tasks">Task List Example</Link>
       </footer>
     </main>
   );
