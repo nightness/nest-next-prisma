@@ -1,0 +1,55 @@
+/* app/styles.module.css */
+.main {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  
+  .features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .feature {
+    padding: 1rem;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+  }
+  
+  .feature h2 {
+    margin: 0 0 0.5rem;
+  }
+  
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+  }
+  
+  .footer p {
+    margin-bottom: 1rem;
+  }
+  
+  .footer a {
+    margin: 0 0.5rem;
+    color: #0070f3;
+    text-decoration: none;
+  }
+  
+  .footer a:hover {
+    text-decoration: underline;
+  }
+  
