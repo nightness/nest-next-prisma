@@ -142,3 +142,7 @@ The application is set up with Docker for both development and production enviro
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+
+## Acknowledgements
+
+- [Modernize-Nextjs-Free](https://github.com/adminmart/Modernize-Nextjs-Free) - The frontend template used.
