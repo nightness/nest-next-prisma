@@ -52,7 +52,17 @@ if (supportsRawMode) {
   process.stdin.setRawMode(true);
 
   // Prevent Ctrl+C from sending SIGINT to the process
-  process.stdin.on('keypress', (str, key) => {
+  process.stdin.on('keypress', async (str, key) => {
+    if (key.name === 'r') {
+      // Reload
+      console.log('Reloading...');
+
+      // Kill all running processes
+      await stopAllProcesses();
+
+      // Start the app again
+      startApp();
+    }
     if (key.ctrl && key.name === 'c') {
       // console.log('Ctrl+C was pressed, but it is disabled.');
       shutdown();
@@ -61,7 +71,7 @@ if (supportsRawMode) {
 } else {
   // Inside the container, raw mode is not supported
   // Telemetry opt-out Next.js... If not in a container, the user's preference will be used
-  process.env.NEXT_TELEMETRY_DISABLED = '1';
+  process.env.NEXT_TELEMETRY_DISABLED = '1';  
 }
 
 // Watch the 'src' directory for changes.
@@ -104,9 +114,6 @@ const watcher = (function () {
 
     // Kill all running processes
     await stopAllProcesses();
-
-    // Clear out old processes (should be empty after stopAllProcesses anyways)
-    processes = [];
 
     // Start the app again
     startApp();
@@ -257,6 +264,15 @@ async function stopAllProcesses(signals = ['SIGINT', 'SIGTERM', 'SIGKILL']) {
   if (processes.length > 0 && signals.length > 0) {
     await stopAllProcesses(signals);
   }
+
+  // Warn if there are still processes running and there are no more signals to try
+  if (processes.length > 0 && signals.length === 0) {
+    console.warn('Unable to kill the following processes:', processes.map((proc) => proc.pid).join(', '));
+  }
+
+  // Clear out old processes (hopeful was empty anyways, but move on if not)
+  // See warning above if this is not empty
+  processes = [];
 }
 
 // Helper function to send a signal to all running processes
