@@ -21,7 +21,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": false,
-    "paths": null,
+    "paths": null    
   },
   "include": [
     "src/**/*"
