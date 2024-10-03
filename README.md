@@ -1,41 +1,71 @@
-# NestJS and Next.js Hybrid Starter Template
+# Full Stack PWA Starter Template with Next.js, NestJS, Prisma, and Docker
 
-Starter template that incorporates a **Next.js** frontend with a **NestJS** backend, both sharing the same project structure and Prisma ORM schema. The template also includes Docker setup for both production and development environments, with live updates enabled during development.
+Welcome to the **Full Stack PWA Starter Template**, a robust boilerplate that combines the power of **Next.js**, **NestJS**, **Prisma**, and **Docker** to accelerate your development workflow. This template provides a seamless integration between the frontend and backend, sharing the same project structure and ORM schema, all while leveraging Docker for both development and production environments.
 
-## Description
+## Table of Contents
 
-This project is a starter template that combines [NestJS](https://nestjs.com/) and [Next.js](https://nextjs.org/) to build a full-stack Progressive Web application. It uses a shared Prisma ORM schema for database interactions. Running the two together allows Express to serve both backend and frontend through a single server.
-
-Docker support is built in to streamline deployment in both development and production environments. Development mode supports live updates with filesystem syncing, ensuring code changes are automatically reflected without restarting the server.
-
-The project structure includes a `src/` directory for the NestJS backend and an `app/` directory for the Next.js (app router) frontend and other project-root level folders (not already used) can be used by Next. The `start-hybrid.js` script allows both servers to run together; with Next running as Nest/Express middleware. All Nest routes start with the `/api/` prefix. Nest also handles the `/css/` and `/swagger/` prefixes, all other routes are handled by Next. These routes are also not cached by the PWA service worker.
+- [Features](#features)
+- [Benefits of Tight Coupling](#benefits-of-tight-coupling)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+    - [Development Mode](#development-mode)
+    - [Production Mode](#production-mode)
+- [Project Structure](#project-structure)
+- [Available Scripts](#available-scripts)
+- [Usage](#usage)
+  - [Accessing the Application](#accessing-the-application)
+  - [Choosing Your UI Library](#choosing-your-ui-library)
+- [Docker Details](#docker-details)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ## Features
 
-- **Next.js Frontend**: A React-based frontend with server-side rendering.
-- **NestJS Backend**: A backend framework built to scale.
-- **Material UI Integration**: Integrates Material UI (v6) for a modern UI framework.
-- **TypeScript Support**: Written entirely in TypeScript for type safety.
-- **Hybrid Server**: Both Next.js and NestJS run together using a custom script.
-- **Swagger API Documentation**: Auto-generated API documentation using Swagger.
-- **Prisma ORM**: Simplifies database interaction through type-safe queries.
-- **Testing Setup**: Jest is configured for both unit and integration testing.
-- **Linting and Formatting**: ESLint and Prettier are used to ensure code consistency.
-- **Docker Support**:
-  - **Production**: Docker setup for production with proper environment management.
-  - **Development**: Docker environment supports live updates using file watching.
+- **Single project Structure**: No monorepo setup required; frontend and backend in the same project.
+- **Next.js Frontend**: React-based frontend with server-side rendering and PWA capabilities.
+- **NestJS Backend**: Scalable backend framework with modular architecture.
+- **Prisma ORM**: Type-safe database interactions with a shared schema.
+- **Dockerized Environment**: Consistent development and production setups using Docker.
+- **Live Reloading**: Instant code updates during development with filesystem syncing.
+- **Hybrid Server**: Serve both frontend and backend through a single Express server.
+- **Swagger Documentation**: Auto-generated API docs for seamless API exploration.
+- **TypeScript Support**: End-to-end type safety across the stack.
+- **Testing Suite**: Pre-configured Jest for unit and integration tests.
+- **Linting and Formatting**: ESLint and Prettier for code consistency.
+- **UI Library Agnostic**: Allows you to choose your preferred UI component library and CSS toolset.
+
+## Benefits of Tight Coupling
+
+By tightly integrating **Next.js**, **NestJS**, **Prisma**, and **Docker**, this template offers:
+
+- **Unified Development Experience**: Seamlessly navigate between frontend and backend code in a single project.
+- **Shared Types and Schemas**: Reduce duplication and errors by sharing Prisma models and TypeScript interfaces.
+- **Consistent Environments**: Docker ensures that development and production environments mirror each other.
+- **Simplified Setup**: One-time setup for all services, reducing configuration overhead.
+- **Enhanced Productivity**: Live reloading and shared codebase accelerate development speed.
+- **Scalability**: Modular architecture allows for easy expansion and maintenance.
+- **Flexibility in UI Development**: Choose any UI component library and CSS toolset that fits your project's needs.
+- **Nest/Express Routing**: All Next and Nest routes are served through a single Express server. This allows for easy API integration and server-side rendering.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js**: Ensure you have Node.js (v18.x or later) installed.
-- **npm, yarn, pnpm**: Use your preferred package manager to manage dependencies.
-- **Docker**: Install Docker to use the containerized environment.
+- **Node.js**: Version 18.x or later.
+- **Package Manager**: npm, yarn, or pnpm.
+- **Docker**: Installed and running.
 
 ### Installation
 
 1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/nightness/nest-next-prisma.git
+   cd nest-next-prisma
+   ```
+
 2. **Install Dependencies**
 
    ```bash
@@ -46,36 +76,31 @@ The project structure includes a `src/` directory for the NestJS backend and an 
 
 #### Development Mode
 
-To start the application in development mode with Docker:
+Start the application in development mode with Docker:
 
-```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
-Or use the npm script:
 ```bash
 npm run docker:dev
 ```
 
-This will bring up the entire development environment (NestJS and Next.js) in Docker with live updates enabled. Any changes made to the codebase will be reflected without needing to restart the container.
+This command builds and runs the Docker containers defined in `docker-compose.dev.yml`, enabling live updates and syncing code changes without restarting the server.
 
-Alternatively, you can run the app without Docker:
+Alternatively, run the application without Docker:
 
-Or use the npm script:
 ```bash
 npm run dev
 ```
 
 #### Production Mode
 
-To build and run the application in production mode with Docker:
+Build and run the application in production mode with Docker:
 
 ```bash
-docker-compose up --build
+npm run docker:start
 ```
 
-This starts the container with the application built for production. The application will be available at `http://localhost:3000`.
+This uses the `docker-compose.yml` configuration to build optimized production containers.
 
-You can also run the application in production without Docker:
+To run the application in production without Docker:
 
 ```bash
 npm run build
@@ -85,63 +110,71 @@ npm start
 ## Project Structure
 
 ```plaintext
-├── app/                    # Next.js frontend application
+├── app/                    # Next.js frontend
 │   ├── page.tsx            # Home page
 │   ├── layout.tsx          # Root layout
-│   ├── globals.css         # Global CSS
-│   └── theme/              # MUI theme configuration
-├── src/                    # NestJS backend application
-│   ├── app.controller.ts   # Root controller
-│   ├── app.module.ts       # Root module
-│   ├── main.ts             # Entry point
-├── docker-compose.yml       # Docker configuration for production
-├── docker-compose.dev.yml   # Docker configuration for development (with live updates)
-├── start-hybrid.js         # Custom script to start the hybrid server
-├── jest.config.json        # Jest configuration
-├── next.config.js          # Next.js configuration
-├── package.json            # Project metadata and scripts
-├── tsconfig.json           # TypeScript configuration
-└── tsconfig.server.json    # TypeScript configuration for server-side code
+│   ├── globals.css         # Global styles
+├── src/                    # NestJS backend
+│   ├── app.controller.ts   # Main controller
+│   ├── app.module.ts       # Main module
+│   ├── main.ts             # Application entry point
+├── prisma/                 # Prisma schema and migrations
+├── docker-compose.yml      # Production Docker configuration
+├── docker-compose.dev.yml  # Development Docker configuration
+├── start-hybrid.js         # Script to start hybrid server
+├── package.json            # Project scripts and dependencies
+└── ...                     # Additional configuration files
 ```
 
 ## Available Scripts
 
-- **`npm run dev`**: Starts the development server.
-- **`npm run build`**: Builds the application for production.
-- **`npm start`**: Starts the production server.
-- **`npm run lint`**: Lints the codebase using ESLint.
-- **`npm run lint:fix`**: Fixes fixable linting errors.
-- **`npm run format`**: Formats code using Prettier.
-- **`npm run test`**: Runs tests with Jest.
-- **`npm run docker:dev`**: Starts the development environment using Docker, but with live updates.
-- **`npm run docker:start`**: Starts the production environment using Docker.
-- **`npm run docker:down`**: Stops and removes the Docker containers.
-- **`npm run docker:clean`**: Stops and removes the Docker containers and volumes.
-- **`npm run docker:logs`**: Shows the logs of the Docker containers.
-- **`npm run docker:shell`**: Opens a shell in the Docker container.
+- **`npm run dev`**: Start development server without Docker.
+- **`npm run build`**: Build the application for production.
+- **`npm start`**: Start the production server.
+- **`npm run lint`**: Lint codebase using ESLint.
+- **`npm run format`**: Format code using Prettier.
+- **`npm run test`**: Run tests with Jest.
+- **`npm run docker:dev`**: Start development environment with Docker.
+- **`npm run docker:start`**: Start production environment with Docker.
+- **`npm run docker:down`**: Stop and remove Docker containers.
+- **`npm run prisma:generate`**: Generate Prisma client.
+- **`npm run prisma:studio`**: Open Prisma Studio.
 
 ## Usage
 
 ### Accessing the Application
 
-- **Home Page**: Visit `http://localhost:3000/` to see the home page.
-- **Swagger API Docs**: Access the Swagger API docs at `http://localhost:3000/swagger`.
+- **Frontend**: `http://localhost:3000/`
+- **Backend**: `http://localhost:3000/api`
+- **Swagger API Docs**: `http://localhost:3000/swagger`
 
-### Material UI Integration
+### Choosing Your UI Library
 
-- **Theme Configuration**: The MUI theme is configured in `app/theme/index.ts`.
+This template is UI library agnostic, meaning you can integrate any UI component library and CSS toolset of your choice. Whether you prefer **Tailwind CSS**, **Material UI**, **Bootstrap**, **Chakra UI**, **Shadcn** or any other library, the template provides a solid foundation for you to build upon.
+
+**To integrate your preferred UI library:**
+
+1. Install the library using your package manager:
+
+   ```bash
+   npm install your-ui-library
+   ```
+
+2. Import and use the components in your Next.js pages and components.
+
+3. Configure any necessary theme providers or global styles as per the library's documentation.
 
 ## Docker Details
 
-The application is set up with Docker for both development and production environments:
+- **Development Environment**: `docker-compose.dev.yml` sets up containers with live reloading and volume mappings for code syncing.
+- **Production Environment**: `docker-compose.yml` builds optimized containers suitable for deployment.
 
-- **Production Docker**: The `docker-compose.yml` file configures the production environment, including Redis and MySQL services.
-- **Development Docker (with live updates)**: The `docker-compose.dev.yml` file is configured for development with live updates, ensuring the containers reload automatically when code changes are detected. The volume mappings ensure your changes in the host filesystem are synced with the Docker container.
+Services included:
+
+- **App**: The combined Next.js and NestJS application.
+- **MySQL**: Database service for data persistence.
+- **Redis**: In-memory data store for caching and sessions.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
-
-## Acknowledgements
-
-- [Modernize-Nextjs-Free](https://github.com/adminmart/Modernize-Nextjs-Free) - The frontend template used.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
