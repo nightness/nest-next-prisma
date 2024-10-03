@@ -29,7 +29,6 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "docker:build": "docker build -t test-app .",
-    "docker:clean": "docker system prune -af",
     "docker:migrate": "docker exec -it $(docker ps -qf \"name=test-app\") npm run migrate",
     "docker:up": "docker-compose up -d",
     "docker:start": "docker-compose up --build",

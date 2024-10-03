@@ -118,7 +118,6 @@ npm start
 - **`npm run docker:down`**: Stops and removes the Docker containers.
 - **`npm run docker:clean`**: Stops and removes the Docker containers and volumes.
 - **`npm run docker:logs`**: Shows the logs of the Docker containers.
-- **`npm run docker:prune`**: Removes all stopped Docker containers.
 - **`npm run docker:shell`**: Opens a shell in the Docker container.
 
 ## Usage
