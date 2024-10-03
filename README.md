@@ -23,7 +23,7 @@ Welcome to the **Full Stack PWA Starter Template**, a robust boilerplate that co
 
 ## Features
 
-- **Single project Structure**: No monorepo setup required; frontend and backend in the same project.
+- **Unified Codebase**: Both frontend and backend reside in the same repository for easier management.
 - **Next.js Frontend**: React-based frontend with server-side rendering and PWA capabilities.
 - **NestJS Backend**: Scalable backend framework with modular architecture.
 - **Prisma ORM**: Type-safe database interactions with a shared schema.
@@ -34,7 +34,7 @@ Welcome to the **Full Stack PWA Starter Template**, a robust boilerplate that co
 - **TypeScript Support**: End-to-end type safety across the stack.
 - **Testing Suite**: Pre-configured Jest for unit and integration tests.
 - **Linting and Formatting**: ESLint and Prettier for code consistency.
-- **UI Library Agnostic**: Allows you to choose your preferred UI component library and CSS toolset.
+- **UI Library Agnostic**: Choose any UI component library and CSS toolset that fits your project.
 
 ## Benefits of Tight Coupling
 
@@ -150,7 +150,7 @@ npm start
 
 ### Choosing Your UI Library
 
-This template is UI library agnostic, meaning you can integrate any UI component library and CSS toolset of your choice. Whether you prefer **Tailwind CSS**, **Material UI**, **Bootstrap**, **Chakra UI**, **Shadcn** or any other library, the template provides a solid foundation for you to build upon.
+This template is UI-library agnostic, allowing you to integrate any UI component library and CSS toolset of your choice. Whether you prefer **Tailwind CSS**, **Material UI**, **Bootstrap**, **Chakra UI**, **Shadcn** or any other library, the template provides a solid foundation for you to build upon.
 
 **To integrate your preferred UI library:**
 
