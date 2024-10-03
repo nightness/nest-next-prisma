@@ -21,6 +21,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": false,
+    "tsBuildInfoFile": ".nest/tsbuildinfo.json",
     "paths": null    
   },
   "include": [
