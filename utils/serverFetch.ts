@@ -4,7 +4,7 @@ interface ServerFetchOptions extends RequestInit {
   sendAccessToken?: boolean;
 }
 
-export async function serverFetch<T>(url: string, { sendAccessToken, ...options }: ServerFetchOptions): Promise<[number, T | null]> {
+export async function serverFetch<T>(url: string, { sendAccessToken, ...options }: ServerFetchOptions): Promise<[number, T | null, Error | null]> {
   const baseUrl = getBaseUrl();
   const token = localStorage.getItem('token');
   let headers: HeadersInit = { 'Content-Type': 'application/json', ...options.headers };
@@ -20,23 +20,23 @@ export async function serverFetch<T>(url: string, { sendAccessToken, ...options 
     ...options,
   });
 
+  // Check if response is empty
+  if (response.ok && response.status !== 204) {
+    try {
+      const data = (await response.json()) as T;
+      return [response.status, data, null];
+    } catch (e) {
+      return [response.status, null, e as Error];
+    }    
+  }
 
   if (!response.ok) {
     let error = 'Request failed';
     try {
       error = await response.text();
     } catch (e) { }
-    throw new Error(error);
+    return [response.status, null, new Error(error)];
   }
 
-  // Check if response is empty
-  if (response.status !== 204) {
-    // Check that content type is JSON
-    // if (!response.headers.get('content-type')?.includes('application/json')) {
-    //   throw new Error('Invalid content type');
-    // }
-    return [response.status, await response.json() as T];
-  }
-
-  return [response.status, null];
+  return [response.status, null, null];
 }

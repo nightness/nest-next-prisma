@@ -1,5 +1,5 @@
 // File: app/utils/authUtils.ts
-import { decodePayload } from './jwt';
+import { getExpirationTime } from './jwt';
 import { serverFetch } from './serverFetch';
 
 interface AuthenticationResponse {
@@ -13,30 +13,6 @@ interface RefreshResponse {
 
 let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
 let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
-
-async function getExpirationTime(token: string): Promise<number> {
-  // Decode the token to get the payload.
-  const decoded = await decodePayload(token);
-  if (!decoded) {
-    throw new Error('Invalid token: missing payload');
-  }
-
-  // If no expiration time is set, return 0
-  if (!decoded.exp) {
-    return 0;
-  }
- 
-  // Calculate expiration time (in milliseconds)
-  const expirationTime = decoded.exp * 1000; // `exp` is in seconds, convert to milliseconds.
-  const currentTime = Date.now();
-  const timeUntilExpiration = expirationTime - currentTime;
-
-  if (timeUntilExpiration <= 0) {
-    throw new Error('Token already expired');
-  }
-
-  return timeUntilExpiration;
-}
 
 async function setTokens(accessToken: string, refreshToken?: string) {
   if (!accessToken) {
@@ -59,8 +35,10 @@ async function setTokens(accessToken: string, refreshToken?: string) {
   // Get the expiration time of the access token
   const timeUntilExpiration = await getExpirationTime(accessToken);
 
+  console.log('Access token set, expires in', timeUntilExpiration, 'seconds');
+
   // Set the timer to refresh the token one minute before expiration
-  const refreshTime = timeUntilExpiration - 60 * 1000;
+  const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
 
   accessTokenRefreshTimeout = setTimeout(async () => {
     try {
@@ -69,7 +47,9 @@ async function setTokens(accessToken: string, refreshToken?: string) {
     } catch (error) {
       console.error('Failed to refresh access token', error);
     }
-  }, refreshTime);
+  }, refreshTimeMs);
+
+  console.log('Access token refresh timer set');
 }
 
 async function refreshAccessToken(): Promise<string> {
@@ -101,13 +81,29 @@ export async function login(email: string, password: string): Promise<void> {
   }
 }
 
+export async function isLoggedIn(): Promise<boolean> {
+  // Check if the access token is stored in local storage
+  const accessToken = localStorage.getItem('access_token');
+  if (!accessToken) {
+    return false;
+  }
+
+  try {
+    // Get the expiration time of the access token, will throw an error if the token is expired
+    await getExpirationTime(accessToken);  
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function signOut() {
-  const accessToken = localStorage.getItem('token');
-  const currentRefreshToken = localStorage.getItem('refreshToken');
+  const accessToken = localStorage.getItem('access_token');
+  const currentRefreshToken = localStorage.getItem('refresh_token');
 
   // Delete the access token
   if (accessToken) {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
   }
 
   // If there is no refresh token, there is no need to sign out
@@ -123,7 +119,7 @@ export async function signOut() {
       });
 
       // Clear the refresh token from local storage
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('refresh_token');
     } catch (error) {
       throw new Error('Failed to sign out');
     } finally {

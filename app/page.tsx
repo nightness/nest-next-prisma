@@ -10,28 +10,16 @@ const features = [
     description: 'Frontend and backend in a single repository for easier management.',
   },
   {
-    title: 'Next.js Frontend',
-    description: 'React-based frontend with server-side rendering and PWA capabilities.',
-  },
-  {
-    title: 'NestJS/Next.js Hybrid Backend',
-    description: 'Scalable backend framework with modular architecture.',
-  },
-  {
     title: 'Prisma ORM',
     description: 'Type-safe database interactions with a shared schema.',
   },
   {
     title: 'Dockerized Environment',
-    description: 'Consistent development and production setups using Docker.',
-  },
-  {
-    title: 'Live Reloading',
-    description: 'Instant code updates during development with filesystem syncing.',
+    description: 'Consistent development and production setups using Docker. The Docker development environment supports hot-reloading.',
   },
   {
     title: 'Hybrid Server',
-    description: 'Serve both frontend and backend through a single Express server.',
+    description: 'Serve both Next and Nest through a single Express server.',
   },
   {
     title: 'Swagger Documentation',
