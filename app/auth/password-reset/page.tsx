@@ -1,4 +1,7 @@
+"use client";
+
 // File: app/auth/password-reset/page.tsx
+
 import { useState } from 'react';
 import { serverFetch } from '@/utils/serverFetch';
 

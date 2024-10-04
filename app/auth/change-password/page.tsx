@@ -1,4 +1,7 @@
+"use client";
+
 // File: app/auth/change-password/page.tsx
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';

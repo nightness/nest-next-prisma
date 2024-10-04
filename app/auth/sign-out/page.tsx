@@ -1,5 +1,7 @@
 "use client";
 
+// app/auth/sign-out/page.tsx
+
 import { serverFetch } from "@/utils/serverFetch";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -20,7 +22,7 @@ export default function signOutPage() {
     if (currentRefreshToken) {
       // Sign out by sending the refresh token to the server
       try {
-        await serverFetch('/api/auth/sign-out', {
+        await serverFetch('/api/auth/logout', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -22,6 +22,7 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   
   .feature {
@@ -37,7 +38,6 @@
   }
   
   .footer {
-    margin-top: 2rem;
     margin-bottom: 1rem;
     text-align: center;
   }

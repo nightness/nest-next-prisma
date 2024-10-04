@@ -101,7 +101,11 @@ export class AuthController {
   @Post('logout')
   @HandlerInfo('logout')
   @ApiOperation({ summary: 'Logout a user' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'User logged out' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'User logged out' })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Invalid refresh token',
+  })
   @ApiBody({
     required: true,
     description: 'Refresh token',
@@ -118,9 +122,9 @@ export class AuthController {
   ): Promise<void> {
     try {
       await this.authService.deleteRefreshToken(refreshToken);
-      response.status(HttpStatus.OK).send();
+      response.status(HttpStatus.NO_CONTENT).send();
     } catch (e) {
-      response.status(HttpStatus.CONFLICT).send();
+      response.status(HttpStatus.NOT_FOUND).send();
     }
   }
 

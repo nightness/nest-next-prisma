@@ -62,15 +62,21 @@ export default function HomePage() {
         A robust boilerplate combining Next.js, NestJS, Prisma, and Docker.
       </p>
 
-      <div className={styles.footer}>
-        <p>
-          Get started by editing <code>app/page.tsx</code>
-        </p>
-        <Link href="/api/hello">Visit API Endpoint</Link>
-        {' | '}
-        <Link href="/swagger">View Swagger Docs</Link>
-        {' | '}
-        <Link href="/tasks">Task List Example</Link>
+      <div className={styles.features}>
+        <div className={styles.feature}>
+          <div className={styles.footer}>
+            <p>
+              Get started by editing <code>app/page.tsx</code>
+            </p>
+            <Link href="/api/hello">Visit API Endpoint</Link>
+            {' | '}
+            <Link href="/swagger">View Swagger Docs</Link>
+            {' | '}
+            <Link href="/tasks">Task List Example</Link>
+            {' | '}
+            <Link href="/auth">Auth Pages</Link>
+          </div>
+        </div>
       </div>
 
       <div className={styles.features}>
