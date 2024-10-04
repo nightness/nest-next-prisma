@@ -1,10 +1,10 @@
-"use client";
-
 // File: app/auth/sign-in/page.tsx
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
+import styles from '../../(styles)/styles.module.css';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -21,8 +21,7 @@ export default function SignIn() {
       }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
-      }); // Data won't be null, not a no-content response
-      console.log("Sign-in data", data);
+      });
       localStorage.setItem('token', data!.access_token);
       localStorage.setItem('refreshToken', data!.refresh_token);
       router.push('/');
@@ -32,14 +31,15 @@ export default function SignIn() {
   };
 
   return (
-    <form onSubmit={handleSignIn}>
-      <h1>Sign In</h1>
+    <form onSubmit={handleSignIn} className={styles.form}>
+      <h1 className={styles.title}>Sign In</h1>
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
         required
+        className={styles.input}
       />
       <input
         type="password"
@@ -47,9 +47,10 @@ export default function SignIn() {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
         required
+        className={styles.input}
       />
-      <button type="submit">Sign In</button>
-      {error && <p>{error}</p>}
+      <button type="submit" className={styles.button}>Sign In</button>
+      {error && <p className={styles.error}>{error}</p>}
     </form>
   );
 }

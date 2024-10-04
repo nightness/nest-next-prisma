@@ -2,5 +2,23 @@ body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    background-color: transparent;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    /* Light grey to make the app feel clean */
+    color: #333;
+    /* Dark text for readability */
+    line-height: 1.6;
+}
+
+* {
+    box-sizing: inherit;
+}
+
+a {
+    color: #0070f3;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }

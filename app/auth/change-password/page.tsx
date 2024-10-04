@@ -1,10 +1,9 @@
 "use client";
 
-// File: app/auth/change-password/page.tsx
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
+import styles from '../../(styles)/styles.module.css';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -34,14 +33,15 @@ export default function ChangePassword() {
   };
 
   return (
-    <form onSubmit={handleChangePassword}>
-      <h1>Change Password</h1>
+    <form onSubmit={handleChangePassword} className={styles.form}>
+      <h1 className={styles.title}>Change Password</h1>
       <input
         type="password"
         value={currentPassword}
         onChange={(e) => setCurrentPassword(e.target.value)}
         placeholder="Current Password"
         required
+        className={styles.input}
       />
       <input
         type="password"
@@ -49,10 +49,11 @@ export default function ChangePassword() {
         onChange={(e) => setNewPassword(e.target.value)}
         placeholder="New Password"
         required
+        className={styles.input}
       />
-      <button type="submit">Change Password</button>
-      {error && <p>{error}</p>}
-      {success && <p>{success}</p>}
+      <button type="submit" className={styles.button}>Change Password</button>
+      {error && <p className={styles.error}>{error}</p>}
+      {success && <p className={styles.success}>{success}</p>}
     </form>
   );
 }

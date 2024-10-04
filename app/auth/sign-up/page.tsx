@@ -1,10 +1,10 @@
-"use client";
-
 // File: app/auth/sign-up/page.tsx
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
+import styles from '../../(styles)/styles.module.css';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -22,7 +22,7 @@ export default function SignUp() {
       }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ email, password, name }),
-      }); // Data won't be null, not a no-content response
+      });
       localStorage.setItem('token', data!.access_token);
       localStorage.setItem('refreshToken', data!.refresh_token);
       router.push('/');
@@ -32,14 +32,15 @@ export default function SignUp() {
   };
 
   return (
-    <form onSubmit={handleSignUp}>
-      <h1>Sign Up</h1>
+    <form onSubmit={handleSignUp} className={styles.form}>
+      <h1 className={styles.title}>Sign Up</h1>
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Name"
         required
+        className={styles.input}
       />
       <input
         type="email"
@@ -47,6 +48,7 @@ export default function SignUp() {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
         required
+        className={styles.input}
       />
       <input
         type="password"
@@ -54,9 +56,10 @@ export default function SignUp() {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
         required
+        className={styles.input}
       />
-      <button type="submit">Sign Up</button>
-      {error && <p>{error}</p>}
+      <button type="submit" className={styles.button}>Sign Up</button>
+      {error && <p className={styles.error}>{error}</p>}
     </form>
   );
 }
