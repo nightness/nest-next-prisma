@@ -4,8 +4,3 @@ body {
     box-sizing: border-box;
     background-color: transparent;
 }
-
-body.native-dark-active {
-    background-color: #343434;
-    color: #fff;
-}
