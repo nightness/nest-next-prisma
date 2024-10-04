@@ -1,5 +1,5 @@
 // File: app/utils/authUtils.ts
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { decodePayload } from './jwt';
 import { serverFetch } from './serverFetch';
 
 interface AuthenticationResponse {
@@ -12,25 +12,11 @@ interface RefreshResponse {
 }
 
 let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
-let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null;
+let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
 
-function getPayload(token: string): JwtPayload {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET not set');
-  }
-
+async function getExpirationTime(token: string): Promise<number> {
   // Decode the token to get the payload.
-  const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
-  if (!decoded || !decoded.exp) {
-    throw new Error('Invalid token: missing expiration time');
-  }
-
-  return decoded;
-}
-
-function getExpirationTime(token: string): number {
-  // Decode the token to get the payload.
-  const decoded = getPayload(token);
+  const decoded = await decodePayload(token);
   if (!decoded) {
     throw new Error('Invalid token: missing payload');
   }
@@ -52,13 +38,9 @@ function getExpirationTime(token: string): number {
   return timeUntilExpiration;
 }
 
-function setTokens(accessToken: string, refreshToken?: string) {
+async function setTokens(accessToken: string, refreshToken?: string) {
   if (!accessToken) {
     throw new Error('No token provided');
-  }
-
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET not set');
   }
 
   // Clear the refresh timeout if it exists
@@ -75,7 +57,7 @@ function setTokens(accessToken: string, refreshToken?: string) {
   }
 
   // Get the expiration time of the access token
-  const timeUntilExpiration = getExpirationTime(accessToken);
+  const timeUntilExpiration = await getExpirationTime(accessToken);
 
   // Set the timer to refresh the token one minute before expiration
   const refreshTime = timeUntilExpiration - 60 * 1000;
@@ -103,7 +85,7 @@ async function refreshAccessToken(): Promise<string> {
   });
 
   const { access_token: newToken } = data!;
-  setTokens(newToken);
+  await setTokens(newToken);
   return newToken;
 }
 
@@ -113,8 +95,7 @@ export async function login(email: string, password: string): Promise<void> {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    localStorage.setItem('token', data!.access_token);
-    localStorage.setItem('refreshToken', data!.refresh_token);
+    await setTokens(data!.access_token, data!.refresh_token);
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign in.');
   }
@@ -161,8 +142,7 @@ export async function signUp(email: string, password: string, name: string): Pro
       method: 'POST',
       body: JSON.stringify({ email, password, name }),
     });
-    localStorage.setItem('token', data!.access_token);
-    localStorage.setItem('refreshToken', data!.refresh_token);
+    await setTokens(data!.access_token, data!.refresh_token);
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign up.');
   }
