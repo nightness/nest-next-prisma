@@ -1,11 +1,5 @@
 import { getBaseUrl } from "./getBaseUrl";
 
-// const token = localStorage.getItem('token');
-// if (!token) {
-//   router.push('/auth/sign-in');
-//   return;
-// }
-
 interface ServerFetchOptions extends RequestInit {
   sendAccessToken?: boolean;
 }
