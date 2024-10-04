@@ -131,7 +131,6 @@ npm start
 ├── prisma/                 # Prisma schema and migrations
 ├── docker-compose.yml      # Production Docker configuration
 ├── docker-compose.dev.yml  # Development Docker configuration
-
 ├── package.json            # Project scripts and dependencies
 └── ...                     # Additional configuration files
 ```
