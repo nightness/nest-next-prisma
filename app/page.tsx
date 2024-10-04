@@ -13,7 +13,7 @@ const features = [
     description: 'React-based frontend with server-side rendering and PWA capabilities.',
   },
   {
-    title: 'NestJS Backend',
+    title: 'NestJS/Next.js Hybrid Backend',
     description: 'Scalable backend framework with modular architecture.',
   },
   {
@@ -62,16 +62,7 @@ export default function HomePage() {
         A robust boilerplate combining Next.js, NestJS, Prisma, and Docker.
       </p>
 
-      <div className={styles.features}>
-        {features.map((feature) => (
-          <div key={feature.title} className={styles.feature}>
-            <h2>{feature.title}</h2>
-            <p>{feature.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <footer className={styles.footer}>
+      <div className={styles.footer}>
         <p>
           Get started by editing <code>app/page.tsx</code>
         </p>
@@ -80,7 +71,16 @@ export default function HomePage() {
         <Link href="/swagger">View Swagger Docs</Link>
         {' | '}
         <Link href="/tasks">Task List Example</Link>
-      </footer>
+      </div>
+
+      <div className={styles.features}>
+        {features.map((feature) => (
+          <div key={feature.title} className={styles.feature}>
+            <h2>{feature.title}</h2>
+            <p>{feature.description}</p>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

@@ -1,6 +1,6 @@
 /* app/styles.module.css */
 .main {
-    padding: 2rem;
+    padding: 0.25rem;
     max-width: 800px;
     margin: 0 auto;
     font-family: Arial, sans-serif;
@@ -8,8 +8,8 @@
   
   .title {
     text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
   }
   
   .description {
@@ -21,21 +21,24 @@
   .features {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 0.5rem;
   }
   
   .feature {
-    padding: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
     border: 1px solid #eaeaea;
     border-radius: 8px;
   }
   
   .feature h2 {
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.2rem;
   }
   
   .footer {
-    margin-top: 3rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
     text-align: center;
   }
   
