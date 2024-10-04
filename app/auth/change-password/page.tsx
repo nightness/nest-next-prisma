@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
+import { changePassword } from '@/utils/auth';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -15,17 +16,7 @@ export default function ChangePassword() {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        router.push('/auth/sign-in');
-        return;
-      }
-
-      await serverFetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
+      await changePassword(currentPassword, newPassword);
       setSuccess('Password successfully changed.');
     } catch (err: any) {
       setError(err.message || 'Unable to change password.');

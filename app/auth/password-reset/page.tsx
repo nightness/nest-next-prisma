@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
+import { forgotPassword } from '@/utils/auth';
 
 export default function PasswordReset() {
   const [email, setEmail] = useState('');
@@ -13,10 +14,7 @@ export default function PasswordReset() {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await serverFetch('/api/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      });
+      await forgotPassword(email);
       setSuccess('Password reset email sent.');
     } catch (err: any) {
       setError(err.message || 'Unable to send password reset email.');

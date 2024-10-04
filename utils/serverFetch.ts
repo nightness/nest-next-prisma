@@ -1,12 +1,28 @@
 import { getBaseUrl } from "./getBaseUrl";
 
-export async function serverFetch<T>(url: string, options: RequestInit): Promise<[number, T | null]> {
+// const token = localStorage.getItem('token');
+// if (!token) {
+//   router.push('/auth/sign-in');
+//   return;
+// }
+
+interface ServerFetchOptions extends RequestInit {
+  sendAccessToken?: boolean;
+}
+
+export async function serverFetch<T>(url: string, { sendAccessToken, ...options }: ServerFetchOptions): Promise<[number, T | null]> {
   const baseUrl = getBaseUrl();
+  const token = localStorage.getItem('token');
+  let headers: HeadersInit = { 'Content-Type': 'application/json', ...options.headers };
+
+  if (sendAccessToken && !token) {
+    throw new Error('serverFetch: Not authenticated');
+  } else if (sendAccessToken) {
+    headers = { ...headers, Authorization: `Bearer ${token}` };
+  }
+
   const response = await fetch(`${baseUrl}${url}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   });
 
@@ -15,7 +31,7 @@ export async function serverFetch<T>(url: string, options: RequestInit): Promise
     let error = 'Request failed';
     try {
       error = await response.text();
-    } catch (e) {}
+    } catch (e) { }
     throw new Error(error);
   }
 

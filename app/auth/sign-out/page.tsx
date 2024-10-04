@@ -5,44 +5,25 @@ import { serverFetch } from "@/utils/serverFetch";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import styles from '../(styles)/auth.module.css';
+import { signOut } from "@/utils/auth";
 
 export default function signOutPage() {
   const router = useRouter();
 
-  const signOut = useCallback(async function () {
-    const accessToken = localStorage.getItem('token');
-    const currentRefreshToken = localStorage.getItem('refreshToken');
-
-    // Delete the access token
-    if (accessToken) {
-      localStorage.removeItem('token');
+  async function handleSignOut() {
+    try {
+      await signOut();
+      router.push('/');
     }
-
-    // If there is no refresh token, there is no need to sign out
-    if (currentRefreshToken) {
-      // Sign out by sending the refresh token to the server
-      try {
-        await serverFetch('/api/auth/logout', {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refreshToken: currentRefreshToken }),
-        });
-
-        // Delete the refresh token
-        localStorage.removeItem('refreshToken');
-      } catch (error) {
-        console.error("Error signing out", error);
-      }
+    catch (error: any) {
+      console.error(error.message);
     }
-    router.push('/');
-  }, [router]);
+  }
   
   return (
     <main style={{ padding: '2rem' }}>
       <h1>Sign Out</h1>
-      <button onClick={signOut}>Sign Out</button>
+      <button onClick={handleSignOut}>Sign Out</button>
     </main>
   );
 }

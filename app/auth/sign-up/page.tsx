@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
+import { signUp } from '@/utils/auth';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');
@@ -15,20 +16,8 @@ export default function SignUp() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const [status, data] = await serverFetch<{
-        access_token: string;
-        refresh_token: string;
-      }>('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({ email, password, name }),
-      });
-      localStorage.setItem('token', data!.access_token);
-      localStorage.setItem('refreshToken', data!.refresh_token);
-      router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'Unable to sign up.');
-    }
+    await signUp(email, password, name);
+    router.push('/');
   };
 
   return (

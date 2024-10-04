@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
+import { login } from '@/utils/auth';
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
@@ -15,19 +16,12 @@ export default function SignIn() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const [status, data] = await serverFetch<{
-        access_token: string;
-        refresh_token: string;
-      }>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-      localStorage.setItem('token', data!.access_token);
-      localStorage.setItem('refreshToken', data!.refresh_token);
-      router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'Unable to sign in.');
+      await login(email, password);
+    } catch (error: any) {
+      setError(error.message);
+      return;
     }
+    router.push('/');
   };
 
   return (
