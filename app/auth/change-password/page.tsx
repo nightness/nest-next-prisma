@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
-import { changePassword } from '@/utils/auth';
+import { changePassword, isLoggedIn } from '@/utils/auth';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -12,6 +12,11 @@ export default function ChangePassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const router = useRouter();
+
+  if (!isLoggedIn()) {
+    router.push('/auth/sign-in');
+    return null;
+  }
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();

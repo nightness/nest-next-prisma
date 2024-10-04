@@ -41,6 +41,7 @@ async function setTokens(accessToken: string, refreshToken?: string) {
   const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
 
   accessTokenRefreshTimeout = setTimeout(async () => {
+    accessTokenRefreshTimeout = null;
     try {
       const newToken = await refreshAccessToken();
       setTokens(newToken);
@@ -81,20 +82,13 @@ export async function login(email: string, password: string): Promise<void> {
   }
 }
 
-export async function isLoggedIn(): Promise<boolean> {
+export function isLoggedIn(): boolean {
   // Check if the access token is stored in local storage
   const accessToken = localStorage.getItem('access_token');
-  if (!accessToken) {
-    return false;
-  }
 
-  try {
-    // Get the expiration time of the access token, will throw an error if the token is expired
-    await getExpirationTime(accessToken);  
-    return true;
-  } catch (error) {
-    return false;
-  }
+  // To keep this from being an async function, we can use the accessTokenRefreshTimeout variable
+  // to check if the access token is still valid. If it is, we can assume the user is logged in and it is valid.
+  return !!accessToken && accessTokenRefreshTimeout !== null;
 }
 
 export async function signOut() {
