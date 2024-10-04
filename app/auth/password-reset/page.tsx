@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { serverFetch } from '@/utils/serverFetch';
-import styles from '../../(styles)/styles.module.css';
+import styles from '../(styles)/auth.module.css';
 
 export default function PasswordReset() {
   const [email, setEmail] = useState('');

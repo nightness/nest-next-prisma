@@ -1,7 +1,7 @@
 // app/page.tsx
 import React from 'react';
 import Link from 'next/link';
-import styles from './(styles)/styles.module.css';
+import styles from './(styles)/app.module.css';
 
 const features = [
   {
@@ -74,7 +74,7 @@ export default function HomePage() {
             {' | '}
             <Link href="/tasks">Task List Example</Link>
             {' | '}
-            <Link href="/auth">Auth Pages</Link>
+            <Link href="/auth">Authentication Pages</Link>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { serverFetch } from '@/utils/serverFetch';
-import styles from '../../(styles)/styles.module.css';
+import styles from '../(styles)/auth.module.css';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');

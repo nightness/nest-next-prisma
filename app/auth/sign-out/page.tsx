@@ -1,10 +1,10 @@
-"use client";
-
 // app/auth/sign-out/page.tsx
+"use client";
 
 import { serverFetch } from "@/utils/serverFetch";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import styles from '../(styles)/auth.module.css';
 
 export default function signOutPage() {
   const router = useRouter();
