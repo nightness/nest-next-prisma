@@ -123,10 +123,15 @@ npm start
 │   ├── app.module.ts       # Main module
 │   ├── main.ts             # Application entry point
 │   └── config/...          # Configuration files
+├── system/                 # Shared system files
+│   ├── scripts
+│   │   └── start-hybrid.js # Script to start hybrid server
+│   ├── docker/             # Docker configuration files
+│   └── dotenv-init/        # Environment variable initialization
 ├── prisma/                 # Prisma schema and migrations
 ├── docker-compose.yml      # Production Docker configuration
 ├── docker-compose.dev.yml  # Development Docker configuration
-├── start-hybrid.js         # Script to start hybrid server
+
 ├── package.json            # Project scripts and dependencies
 └── ...                     # Additional configuration files
 ```

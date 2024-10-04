@@ -25,7 +25,7 @@ COPY --from=builder /usr/src/app/.next ./.next
 COPY --from=builder /usr/src/app/.nest ./.nest
 COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/public ./public
-COPY --from=builder /usr/src/app/start-hybrid.js ./
+COPY --from=builder /usr/src/app/system/scripts/start-hybrid.js ./system/scripts/start-hybrid.js
 
 # Install netcat-openbsd
 RUN apt-get update && apt-get install -y netcat-openbsd
