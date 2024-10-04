@@ -4,6 +4,19 @@
 # nest.js
 .nest
 
+# dotenv files
+/.env
+/.env.docker
+/.env.docker.dev
+
+# dotenv environment variable files (Traditional files)
+/.env
+/.env.development.local
+/.env.test.local
+/.env.production.local
+/.env.local
+
+
 # PWA files
 public/sw.js
 public/workbox-*.js
@@ -42,13 +55,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
 
 # temp directory
 .temp
@@ -96,19 +102,12 @@ next-env.d.ts
 # Node modules
 node_modules/
 
-# Next.js build output
-.next/
-out/
-
 # TypeScript
 *.tsbuildinfo
 
 # Logs
 logs/
 *.log
-
-# Environment files
-.env
 
 # Lock files
 yarn.lock
