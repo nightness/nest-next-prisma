@@ -1,4 +1,4 @@
-// File: app/utils/authUtils.ts
+// File: app/utils/auth.ts
 import { User } from '@prisma/client';
 import { getExpirationTime } from './jwt';
 import { serverFetch } from './serverFetch';
@@ -16,6 +16,7 @@ let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
 let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
 
 let _currentUser: User | null = null;
+const currentUserListeners: ((user: User | null) => void)[] = [];
 
 // Get the current user, this is fetched and set when the user logs in, and unset when the user logs out
 export const getCurrentUser = () => _currentUser;
@@ -100,7 +101,7 @@ export async function login(email: string, password: string): Promise<void> {
     });
 
     // Set the current user variable
-    _currentUser = user!;
+    setCurrentUser(user);
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign in.');
   }
@@ -137,7 +138,7 @@ export async function signOut() {
     }
 
     // Clear the current user
-    _currentUser = null;
+    setCurrentUser(null);
   }
 }
 
@@ -161,7 +162,7 @@ export async function signUp(email: string, password: string, name: string): Pro
     });
 
     // Set the current user variable
-    _currentUser = user!;
+    setCurrentUser(user);
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign up.');
   }
@@ -186,9 +187,26 @@ export async function changePassword(currentPassword: string, newPassword: strin
   });
 };
 
+export function onCurrentUserChange(listener: (user: User | null) => void) {
+  currentUserListeners.push(listener);
+
+  // Return a function to remove the listener
+  return () => {
+    const index = currentUserListeners.indexOf(listener);
+    if (index !== -1) {
+      currentUserListeners.splice(index, 1);
+    }
+  };
+}
+
 function stopRefreshTimer() {
   if (refreshTokenRefreshTimeout) {
     clearTimeout(refreshTokenRefreshTimeout)
     refreshTokenRefreshTimeout = null;
   }
+}
+
+function setCurrentUser(user: User | null) {
+  _currentUser = user;
+  currentUserListeners.forEach((listener) => listener(user));
 }
