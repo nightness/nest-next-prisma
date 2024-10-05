@@ -23,8 +23,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { DISABLE_REGISTRATION } from '../../config/config.env';
-import { ControllerInfo } from '../../system/decorators/controller-info/controller-info.decorator';
-import { HandlerInfo } from '../../system/decorators/handler-info/handler-info.decorator';
 import { AuthenticatedUserGuard } from '../../system/guards/authenticated.guard';
 import type { Request, Response } from '../../system/types';
 
@@ -39,7 +37,6 @@ import {
 } from './auth.types';
 
 @Controller('auth')
-@ControllerInfo('Authentication')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
@@ -48,7 +45,6 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @HandlerInfo('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: 201,
@@ -75,7 +71,6 @@ export class AuthController {
   }
 
   @Post('login')
-  @HandlerInfo('login')
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({
     status: 200,
@@ -99,7 +94,6 @@ export class AuthController {
   }
 
   @Post('logout')
-  @HandlerInfo('logout')
   @ApiOperation({ summary: 'Logout a user' })
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'User logged out' })
   @ApiResponse({
@@ -129,7 +123,6 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @HandlerInfo('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({
     required: true,
@@ -174,7 +167,6 @@ export class AuthController {
   }
 
   @Post('change-password')
-  @HandlerInfo('changePassword')
   @UseGuards(AuthenticatedUserGuard)
   @ApiOperation({ summary: 'Change user password' })
   @ApiBody({
@@ -208,7 +200,6 @@ export class AuthController {
   }
 
   @Delete('delete')
-  @HandlerInfo('deleteAccount')
   @ApiOperation({ summary: "Delete a user's account" })
   @UseGuards(AuthenticatedUserGuard)
   @ApiBody({
@@ -245,14 +236,14 @@ export class AuthController {
     }
   }
 
+  // FIXME: Add a GET method for the password reset page
   @Get('password-reset/success')
-  @Render('password-reset/completed')
   completedPasswordResetRequest() {
     return {}; // No data to send to ejs renderer
   }
 
+  // FIXME: Add a GET method for the password reset page
   @Get('password-reset')
-  @Render('password-reset/complete')
   completePasswordResetRequest(@Query('token') token: string) {
     // Check if the token is valid
     if (!token) {
@@ -268,7 +259,6 @@ export class AuthController {
   }
 
   @Post('password-reset')
-  @HandlerInfo('completePasswordResetPost')
   @ApiOperation({
     summary: "POST method for updating a user's password from view",
   })
@@ -299,7 +289,6 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  @HandlerInfo('forgotPassword')
   @ApiOperation({
     summary:
       'Sends an e-mail to the specified user so they can reset their password',
@@ -320,7 +309,6 @@ export class AuthController {
   }
 
   @Get('verify-email')
-  @HandlerInfo('verifyEmail')
   @ApiOperation({ summary: 'Verify user email' })
   @ApiQuery({
     required: true,
@@ -335,7 +323,6 @@ export class AuthController {
   }
 
   @Post('send-verification-email')
-  @HandlerInfo('sendVerificationEmail')
   @ApiOperation({ summary: 'Send verification email' })
   @ApiBody({
     required: true,
