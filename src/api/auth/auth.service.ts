@@ -4,12 +4,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-// For generating JWT tokens
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
-// Your custom JwtPayload interface
-import { ACCESS_TOKEN_EXPIRATION, EMAIL_VERIFICATION_TOKEN_EXPIRATION, MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS, MAX_CONCURRENT_PASSWORD_RESET_REQUESTS, MAX_REFRESH_TOKENS, PASSWORD_RESET_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION, SERVER_URL } from '../../config/config.env';
+import {
+  ACCESS_TOKEN_EXPIRATION, 
+  EMAIL_VERIFICATION_TOKEN_EXPIRATION, 
+  MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS, 
+  MAX_CONCURRENT_PASSWORD_RESET_REQUESTS, 
+  MAX_REFRESH_TOKENS, 
+  PASSWORD_RESET_TOKEN_EXPIRATION, 
+  REFRESH_TOKEN_EXPIRATION, 
+  SERVER_URL 
+} from '../../config/config.env';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { EjsService } from '../../modules/ejs/ejs.service';
@@ -28,7 +35,7 @@ export class AuthService {
     private userService: UserService, // Service for user operations
     private jwtService: JwtService, // NestJS JWT service for token operations
     private prisma: PrismaService, // Add PrismaService for database access
-  ) {}
+  ) { }
 
   async refreshToken(refreshToken: string) {
     const user = await this.validateRefreshToken(refreshToken);
@@ -126,8 +133,7 @@ export class AuthService {
       }
 
       throw new BadRequestException(
-        `Too many requests. Try again in ${
-          waitHours === 1 ? 'an hour' : `${waitHours} hours`
+        `Too many requests. Try again in ${waitHours === 1 ? 'an hour' : `${waitHours} hours`
         } hours and ${Math.ceil((waitTime / 60) % 60)} minutes`,
       );
     }
@@ -202,8 +208,7 @@ export class AuthService {
       }
 
       throw new BadRequestException(
-        `Too many requests. Try again in ${
-          waitHours === 1 ? 'an hour' : `${waitHours} hours`
+        `Too many requests. Try again in ${waitHours === 1 ? 'an hour' : `${waitHours} hours`
         } hours and ${Math.ceil((waitTime / 60) % 60)} minutes`,
       );
     }
