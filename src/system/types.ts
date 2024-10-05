@@ -15,10 +15,8 @@ export interface User {
 }
 
 export type Request = ExpressRequest & {
-  user?: JwtPayload;
-  dbUser?: User;
-  controllerName?: string;
-  handlerName?: string;
+  user?: JwtPayload;  // Decoded JWT payload
+  accessToken?: string; // Original JWT token
 };
 
 export type Response = ExpressResponse;

@@ -169,14 +169,15 @@ export class AuthController {
     @Req() req: Request,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<LoginResponseDto> {
-    const user = req.dbUser;
+    const user = req.user;
 
     if (!user) {
       throw new UnauthorizedException('Invalid user');
     }
 
+    const uid = user.sub;
     return await this.authService.changePassword(
-      user.id,
+      uid,
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );
@@ -200,13 +201,15 @@ export class AuthController {
     @Res() response: Response,
   ): Promise<void> {
     try {
-      const user = req.dbUser;
+      const user = req.user;
       if (!user) {
         response.status(HttpStatus.UNAUTHORIZED);
         return;
       }
+  
+      const uid = user.sub;
       const deleted = await this.authService.deleteAccount(
-        user.id,
+        uid,
         password,
       );
       if (!deleted) {
