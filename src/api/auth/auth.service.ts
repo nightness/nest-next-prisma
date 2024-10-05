@@ -30,6 +30,25 @@ export class AuthService {
     private prisma: PrismaService, // Add PrismaService for database access
   ) {}
 
+  async refreshToken(refreshToken: string) {
+    const user = await this.validateRefreshToken(refreshToken);
+    if (!user) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const payload: JwtPayload = {
+      email: user.email,
+      name: user.name || '',
+      sub: user.id,
+      iat: Date.now(),
+      exp: Date.now() + 1000 * 60 * 60, // 1 hour
+    };
+    const access_token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+    });
+    return { user: payload, access_token };
+  }
+
   // Verifies the token used for render the page to reset password
   async completePasswordResetRequest(token: string) {
     // Get the user ID associated with the token

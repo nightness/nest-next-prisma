@@ -41,7 +41,6 @@ import {
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private jwtService: JwtService,
   ) {}
 
   @Post('register')
@@ -147,23 +146,7 @@ export class AuthController {
   async refresh(
     @Body('refreshToken') refreshToken: string,
   ): Promise<{ user: JwtPayload; access_token: string }> {
-    console.log('refreshToken', refreshToken);
-    const user = await this.authService.validateRefreshToken(refreshToken);
-    if (!user) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    const payload: JwtPayload = {
-      email: user.email,
-      name: user.name || '',
-      sub: user.id,
-      iat: Date.now(),
-      exp: Date.now() + 1000 * 60 * 60, // 1 hour
-    };
-    const access_token = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-    });
-    return { user: payload, access_token };
+    return this.authService.refreshToken(refreshToken);
   }
 
   @Post('change-password')
