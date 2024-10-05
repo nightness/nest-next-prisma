@@ -1,4 +1,5 @@
 // File: app/utils/authUtils.ts
+import { User } from '@prisma/client';
 import { getExpirationTime } from './jwt';
 import { serverFetch } from './serverFetch';
 
@@ -14,15 +15,27 @@ interface RefreshResponse {
 let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
 let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
 
+let _currentUser: User | null = null;
+
+// Get the current user, this is fetched and set when the user logs in, and unset when the user logs out
+export const getCurrentUser = () => _currentUser;
+
+export function isLoggedIn(): boolean {
+  // Check if the access token is stored in local storage
+  const accessToken = localStorage.getItem('access_token');
+
+  // To keep this from being an async function, we can use the accessTokenRefreshTimeout variable
+  // to check if the access token is still valid. If it is, we can assume the user is logged in and it is valid.
+  return !!accessToken && accessTokenRefreshTimeout !== null;
+}
+
 async function setTokens(accessToken: string, refreshToken?: string) {
   if (!accessToken) {
     throw new Error('No token provided');
   }
 
-  // Clear the refresh timeout if it exists
-  if (accessTokenRefreshTimeout) {
-    clearTimeout(accessTokenRefreshTimeout);
-  }
+  // Stop the refresh timer
+  stopRefreshTimer();
 
   // Update the stored access token if needed
   localStorage.setItem('access_token', accessToken);
@@ -72,23 +85,25 @@ async function refreshAccessToken(): Promise<string> {
 
 export async function login(email: string, password: string): Promise<void> {
   try {
+    // Fetch the access token and refresh token
     const [status, data] = await serverFetch<AuthenticationResponse>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+
+    // Set's the tokens in local storage
     await setTokens(data!.access_token, data!.refresh_token);
+
+    // Fetch the current user
+    const [meStatus, user] = await serverFetch<User>('/api/auth/me', {
+      sendAccessToken: true,
+    });
+
+    // Set the current user variable
+    _currentUser = user!;
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign in.');
   }
-}
-
-export function isLoggedIn(): boolean {
-  // Check if the access token is stored in local storage
-  const accessToken = localStorage.getItem('access_token');
-
-  // To keep this from being an async function, we can use the accessTokenRefreshTimeout variable
-  // to check if the access token is still valid. If it is, we can assume the user is logged in and it is valid.
-  return !!accessToken && accessTokenRefreshTimeout !== null;
 }
 
 export async function signOut() {
@@ -111,20 +126,24 @@ export async function signOut() {
         },
         body: JSON.stringify({ refreshToken: currentRefreshToken }),
       });
-
-      // Clear the refresh token from local storage
-      localStorage.removeItem('refresh_token');
     } catch (error) {
       throw new Error('Failed to sign out');
     } finally {
       // Clear the refresh token from local storage
-      // localStorage.removeItem('refreshToken');
+      localStorage.removeItem('refresh_token');
+
+      // Stop the refresh timer
+      stopRefreshTimer()
     }
+
+    // Clear the current user
+    _currentUser = null;
   }
 }
 
 export async function signUp(email: string, password: string, name: string): Promise<void> {
   try {
+    // Fetch the access token and refresh token
     const [status, data] = await serverFetch<{
       access_token: string;
       refresh_token: string;
@@ -132,7 +151,17 @@ export async function signUp(email: string, password: string, name: string): Pro
       method: 'POST',
       body: JSON.stringify({ email, password, name }),
     });
+
+    // Set the tokens in local storage
     await setTokens(data!.access_token, data!.refresh_token);
+
+    // Fetch the current user
+    const [meStatus, user] = await serverFetch<User>('/api/auth/me', {
+      sendAccessToken: true,
+    });
+
+    // Set the current user variable
+    _currentUser = user!;
   } catch (err: any) {
     throw new Error(err?.message || 'Unable to sign up.');
   }
@@ -156,3 +185,10 @@ export async function changePassword(currentPassword: string, newPassword: strin
     body: JSON.stringify({ currentPassword, newPassword }),
   });
 };
+
+function stopRefreshTimer() {
+  if (refreshTokenRefreshTimeout) {
+    clearTimeout(refreshTokenRefreshTimeout)
+    refreshTokenRefreshTimeout = null;
+  }
+}
