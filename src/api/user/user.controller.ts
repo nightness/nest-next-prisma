@@ -1,7 +1,7 @@
 import { Controller, Get, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import type { Request } from '@/src/system/types';
+import type { Request } from '../../system/types';
 import { JwtPayload } from '../auth/auth.types';
 
 @Controller('user')

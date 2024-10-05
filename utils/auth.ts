@@ -1,7 +1,10 @@
+"use client";
+
 // File: app/utils/auth.ts
 import { User } from '@prisma/client';
 import { getExpirationTime } from './jwt';
 import { serverFetch } from './serverFetch';
+import { useEffect, useState } from 'react';
 
 interface AuthenticationResponse {
   access_token: string;
@@ -19,7 +22,7 @@ let _currentUser: User | null = null;
 const currentUserListeners: ((user: User | null) => void)[] = [];
 
 // Get the current user, this is fetched and set when the user logs in, and unset when the user logs out
-export const getCurrentUser = () => _currentUser;
+export function getCurrentUser() { return  _currentUser; }
 
 export function isLoggedIn(): boolean {
   // Check if the access token is stored in local storage
@@ -197,6 +200,16 @@ export function onCurrentUserChange(listener: (user: User | null) => void) {
       currentUserListeners.splice(index, 1);
     }
   };
+}
+
+export function useCurrentUser() {
+  const [currentUser, setCurrentUser] = useState<User | null>(_currentUser);
+
+  useEffect(() => {
+    return onCurrentUserChange(setCurrentUser);
+  }, []);
+
+  return currentUser;
 }
 
 function stopRefreshTimer() {

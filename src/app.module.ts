@@ -1,8 +1,8 @@
 // src/app.module.ts
 import { join } from 'path';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Algorithm } from 'jsonwebtoken';
 
 import { SseModule } from './modules/sse/sse.module';
@@ -16,6 +16,7 @@ import { FilesystemModule } from './modules/filesystem/filesystem.module';
 
 import { AuthModule } from './api/auth/auth.module';
 import { TasksModule } from './api/tasks/tasks.module';
+import { AuthMiddleware } from './api/auth/auth.middleware';
 @Module({
   imports: [
     // Configure ServeStaticModule to serve the Next.js /public folder
@@ -43,5 +44,11 @@ import { TasksModule } from './api/tasks/tasks.module';
     TasksModule,
   ],  
   controllers: [AppController],
+  providers: [JwtService],
 })
-export class AppModule {}
+export class AppModule {
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer
+  //     .apply(AuthMiddleware)        
+  // }
+}

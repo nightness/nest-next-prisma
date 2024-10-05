@@ -1,3 +1,4 @@
+"use client";
 // app/auth/page.tsx
 
 import Link from 'next/link';
