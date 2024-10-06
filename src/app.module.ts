@@ -17,6 +17,7 @@ import { FilesystemModule } from './modules/filesystem/filesystem.module';
 import { AuthModule } from './api/auth/auth.module';
 import { TasksModule } from './api/tasks/tasks.module';
 import { AuthMiddleware } from './api/auth/auth.middleware';
+import { UserModule } from './api/user/user.module';
 @Module({
   imports: [
     // Configure ServeStaticModule to serve the Next.js /public folder
@@ -42,13 +43,13 @@ import { AuthMiddleware } from './api/auth/auth.middleware';
     EmailerModule,
     FilesystemModule,
     TasksModule,
+    UserModule,
   ],  
   controllers: [AppController],
   providers: [JwtService],
 })
 export class AppModule {
-  // configure(consumer: MiddlewareConsumer) {
-  //   consumer
-  //     .apply(AuthMiddleware)        
-  // }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes('*');
+  }
 }

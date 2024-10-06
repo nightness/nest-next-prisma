@@ -1,8 +1,7 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, NotFoundException, Req } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import type { Request } from '../../system/types';
-import { JwtPayload } from '../auth/auth.types';
 
 @Controller('user')
 @ApiTags('User')
@@ -13,11 +12,12 @@ export class UserController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get the current user' })
-  meRequest(@Req() req: Request) {    
+  meRequest(@Req() req: Request) {  
     const user = req.user;
     if (!user) {
-      return null;
+      throw new ForbiddenException('Login required');
     }
-    return this.userService.findById(user.sub);
+    const result = this.userService.findById(user.sub);
+    return result;
   }
 }

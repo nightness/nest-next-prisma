@@ -4,9 +4,9 @@ interface ServerFetchOptions extends RequestInit {
   sendAccessToken?: boolean;
 }
 
-export async function serverFetch<T>(url: string, { sendAccessToken, ...options }: ServerFetchOptions): Promise<[number, T | null, Error | null]> {
+export async function serverFetch<T>(url: string, { sendAccessToken, ...options }: ServerFetchOptions = {}): Promise<[number, T | null, Error | null]> {
   const baseUrl = getBaseUrl();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   let headers: HeadersInit = { 'Content-Type': 'application/json', ...options.headers };
 
   if (sendAccessToken && !token) {

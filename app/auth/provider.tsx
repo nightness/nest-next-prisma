@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   Pure functions to interact with the server
 */
 
-function initializeCurrentUser() {
+async function initializeCurrentUser() {
 
   console.log('Initializing current user...');
 
@@ -60,18 +60,29 @@ function initializeCurrentUser() {
   const accessToken = localStorage.getItem('access_token');
 
   if (!accessToken) {
+    console.log('No access token found');
     return;
   }
 
-  // Get the expiration time of the access token
-  getExpirationTime(accessToken)
-    .then((timeUntilExpiration) => {
-      // Set refresh timer
-      setRefreshTimer(timeUntilExpiration);
-    })
-    .catch((error) => {
-      console.error('Failed to get expiration time', error);
+  const refreshToken = localStorage.getItem('refresh_token');
+
+  console.log('Setting tokens...');
+  await setTokens(accessToken, refreshToken ?? undefined);
+
+  try {
+    // Load the current user
+    const [status, user, error] = await serverFetch<User>('/api/user/me', {
+      sendAccessToken: true,
     });
+
+    if (status === 200) {
+      setCurrentUser(user);
+    } else {
+      console.error('Failed to get current user: ', error?.message || status);
+    }
+  } catch (error: any) {
+    console.error('Failed to get current user: ', error?.message || 'Unknown error');
+  }
 }
 
 export function isLoggedIn(): boolean {
@@ -155,7 +166,7 @@ export async function login(email: string, password: string): Promise<void> {
     await setTokens(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
-    const [meStatus, user] = await serverFetch<User>('/api/auth/me', {
+    const [meStatus, user] = await serverFetch<User>('/api/user/me', {
       sendAccessToken: true,
     });
 
@@ -216,7 +227,7 @@ export async function signUp(email: string, password: string, name: string): Pro
     await setTokens(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
-    const [meStatus, user] = await serverFetch<User>('/api/auth/me', {
+    const [meStatus, user] = await serverFetch<User>('/api/user/me', {
       sendAccessToken: true,
     });
 
