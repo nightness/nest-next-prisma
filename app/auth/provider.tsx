@@ -31,15 +31,26 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Define the AuthProvider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [loading, setLoading] = useState(true); // Loading state
   const currentUser = useCurrentUser(); // Subscribe to global current user changes
 
   // Initialize the current user
   useEffect(() => {
-    if (!currentUserInitialized) {
-      initializeCurrentUser();
-      currentUserInitialized = true;
+    async function initialize() {
+      if (!currentUserInitialized) {
+        setLoading(true);
+        await initializeCurrentUser(); // Fetch the user from the server
+        currentUserInitialized = true;
+        setLoading(false); // Mark loading as complete
+      }
     }
+
+    initialize();    
   }, []);
+
+  if (loading) {
+    return <></>
+  }
 
   return (
     <AuthContext.Provider value={currentUser}>
@@ -53,26 +64,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 */
 
 async function initializeCurrentUser() {
-
-  console.log('Initializing current user...');
-
   // Check if the access token is stored in local storage
   const accessToken = localStorage.getItem('access_token');
 
   if (!accessToken) {
-    console.log('No access token found');
     return;
   }
 
   const refreshToken = localStorage.getItem('refresh_token');
 
-  console.log('Setting tokens...');
+  // Set the access token and refresh token
   await setTokens(accessToken, refreshToken ?? undefined);
 
   try {
     // Load the current user
     const [status, user, error] = await serverFetch<User>('/api/user/me', {
       sendAccessToken: true,
+      abortTimeout: 5000,
     });
 
     if (status === 200) {
@@ -99,7 +107,6 @@ async function setTokens(accessToken: string, refreshToken?: string) {
     throw new Error('No token provided');
   }
 
-
   // Update the stored access token if needed
   localStorage.setItem('access_token', accessToken);
 
@@ -113,8 +120,6 @@ async function setTokens(accessToken: string, refreshToken?: string) {
 
   // Set refresh timer
   setRefreshTimer(timeUntilExpiration);
-
-  console.log('Access token refresh timer set');
 }
 
 function setRefreshTimer(timeUntilExpiration: number) {
