@@ -21,7 +21,9 @@ interface RefreshResponse {
 
 let currentUserInitialized = false;
 let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
-let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
+
+// TODO: Implement refresh token refresh... I'm thinking the server should handle this by sending a new refresh token
+// with the access token, but only if it's close to expiration.
 
 let _currentUser: User | null = null;
 const currentUserListeners: ((user: User | null) => void)[] = [];
@@ -102,63 +104,6 @@ export function isLoggedIn(): boolean {
   return !!accessToken && accessTokenRefreshTimeout !== null;
 }
 
-async function setTokens(accessToken: string, refreshToken?: string) {
-  if (!accessToken) {
-    throw new Error('No token provided');
-  }
-
-  // Update the stored access token if needed
-  localStorage.setItem('access_token', accessToken);
-
-  // Update the stored refresh token if needed
-  if (refreshToken) {
-    localStorage.setItem('refresh_token', refreshToken);
-  }
-
-  // Get the expiration time of the access token
-  const timeUntilExpiration = await getExpirationTime(accessToken);
-
-  // Set refresh timer
-  setRefreshTimer(timeUntilExpiration);
-}
-
-function setRefreshTimer(timeUntilExpiration: number) {
-  // Set the timer to refresh the token one minute before expiration
-  const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
-
-  // Stop the refresh timer, if it is already set
-  stopRefreshTimer();
-
-  // Set the refresh token refresh timer
-  accessTokenRefreshTimeout = setTimeout(async () => {
-    accessTokenRefreshTimeout = null;
-    try {
-      const newToken = await refreshAccessToken();
-      setTokens(newToken);
-      timeUntilExpiration = await getExpirationTime(newToken);
-    } catch (error) {
-      console.error('Failed to refresh access token', error);
-    }
-  }, refreshTimeMs);
-}
-
-async function refreshAccessToken(): Promise<string> {
-  // Make the API request to refresh the access token
-  const [status, data] = await serverFetch<RefreshResponse>('/api/auth/refresh', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      refreshToken: localStorage.getItem('refresh_token'),
-    }),
-  });
-
-  const { access_token: newToken } = data!;
-  await setTokens(newToken);
-  return newToken;
-}
-
 export async function login(email: string, password: string): Promise<void> {
   try {
     // Fetch the access token and refresh token
@@ -209,7 +154,7 @@ export async function signOut() {
       localStorage.removeItem('refresh_token');
 
       // Stop the refresh timer
-      stopRefreshTimer()
+      stopRefreshAccessTokenTimer()
     }
 
     // Clear the current user
@@ -284,14 +229,71 @@ export function useCurrentUser() {
   return currentUser;
 }
 
-function stopRefreshTimer() {
-  if (refreshTokenRefreshTimeout) {
-    clearTimeout(refreshTokenRefreshTimeout)
-    refreshTokenRefreshTimeout = null;
-  }
+function setRefreshAccessTokenTimer(timeUntilExpiration: number) {
+  // Set the timer to refresh the token one minute before expiration
+  const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
+
+  // Stop the refresh timer, if it is already set
+  stopRefreshAccessTokenTimer();
+
+  // Set the refresh token refresh timer
+  accessTokenRefreshTimeout = setTimeout(async () => {
+    accessTokenRefreshTimeout = null;
+    try {
+      const newToken = await refreshAccessToken();
+      setTokens(newToken);
+      timeUntilExpiration = await getExpirationTime(newToken);
+    } catch (error) {
+      console.error('Failed to refresh access token', error);
+    }
+  }, refreshTimeMs);
+}
+
+function stopRefreshAccessTokenTimer() {
+  if (accessTokenRefreshTimeout) {
+    clearTimeout(accessTokenRefreshTimeout);
+    accessTokenRefreshTimeout = null;
+  }  
 }
 
 function setCurrentUser(user: User | null) {
   _currentUser = user;
   currentUserListeners.forEach((listener) => listener(user));
+}
+
+async function setTokens(accessToken: string, refreshToken?: string) {
+  if (!accessToken) {
+    throw new Error('No token provided');
+  }
+
+  // Update the stored access token if needed
+  localStorage.setItem('access_token', accessToken);
+
+  // Update the stored refresh token if needed
+  if (refreshToken) {
+    localStorage.setItem('refresh_token', refreshToken);
+  }
+
+  // Get the expiration time of the access token
+  const timeUntilExpiration = await getExpirationTime(accessToken);
+
+  // Set refresh timer
+  setRefreshAccessTokenTimer(timeUntilExpiration);
+}
+
+async function refreshAccessToken(): Promise<string> {
+  // Make the API request to refresh the access token
+  const [status, data] = await serverFetch<RefreshResponse>('/api/auth/refresh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      refreshToken: localStorage.getItem('refresh_token'),
+    }),
+  });
+
+  const { access_token: newToken } = data!;
+  await setTokens(newToken);
+  return newToken;
 }
