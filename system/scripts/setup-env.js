@@ -1,6 +1,11 @@
 const { constants, copyFileSync, existsSync } = require('fs');
 const path = require('path');
 
+const isDocker = require('is-docker')();
+if (isDocker) {
+  return;
+}
+
 const envPath = path.resolve('.env');
 const envDockerPath = path.resolve('.env.docker');
 const envDockerDevPath = path.resolve('.env.docker.dev');
