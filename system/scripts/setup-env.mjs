@@ -1,3 +1,4 @@
+// system/scripts/setup-env.mjs
 import isDocker from 'is-docker';
 import { constants, copyFileSync, existsSync } from 'fs';
 import path from 'path';

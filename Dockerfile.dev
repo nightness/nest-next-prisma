@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 # Copy package files and install dependencies
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY system ./system/
 RUN npm install
 RUN npx prisma generate
 
