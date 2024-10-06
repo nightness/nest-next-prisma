@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prepare": "node scripts/setup-env.js",
     "dev": "node system/scripts/start-hybrid.js --watch",
     "dev:nest": "nest start --watch",
     "dev:next": "next dev",
