@@ -203,13 +203,13 @@ export class AuthService {
 
       if (waitHours === 0) {
         throw new BadRequestException(
-          `Too many requests. Try again in ${waitMinutes} minutes`,
+          `Too many requests. Try again in ${waitMinutes} minutes.`,
         );
       }
 
       throw new BadRequestException(
         `Too many requests. Try again in ${waitHours === 1 ? 'an hour' : `${waitHours} hours`
-        } hours and ${Math.ceil((waitTime / 60) % 60)} minutes`,
+        } hours and ${Math.ceil((waitTime / 60) % 60)} minutes.`,
       );
     }
 

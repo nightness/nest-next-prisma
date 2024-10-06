@@ -2,9 +2,8 @@
 "use client";
 
 import { useState } from 'react';
-import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
-import { forgotPassword } from '@/utils/auth';
+import { forgotPassword } from '../provider';
 
 export default function PasswordReset() {
   const [email, setEmail] = useState('');

@@ -32,7 +32,7 @@ export async function getExpirationTime(token: string): Promise<number> {
     const timeUntilExpiration = expirationTime - currentTime;
 
     if (timeUntilExpiration <= 0) {
-      throw new Error('Token already expired');
+      return 0;
     }
 
     return timeUntilExpiration / 1000; // Convert to seconds

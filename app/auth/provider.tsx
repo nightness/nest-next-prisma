@@ -1,10 +1,14 @@
 "use client";
 
-// File: app/utils/auth.ts
-import { User } from '@prisma/client';
-import { getExpirationTime } from './jwt';
-import { serverFetch } from './serverFetch';
+import { getExpirationTime } from "@/utils/jwt";
+import { serverFetch } from "@/utils/serverFetch";
+// app/auth/provider.tsx
+import { User } from "@prisma/client";
+import React, { createContext, use } from "react";
 import { useEffect, useState } from 'react';
+
+// Define the type for the AuthContext value
+type AuthContextType = Partial<User> | null;
 
 interface AuthenticationResponse {
   access_token: string;
@@ -15,14 +19,60 @@ interface RefreshResponse {
   access_token: string;
 }
 
+let currentUserInitialized = false;
 let accessTokenRefreshTimeout: NodeJS.Timeout | null = null;
 let refreshTokenRefreshTimeout: NodeJS.Timeout | null = null; // TODO: Implement refresh token refresh
 
 let _currentUser: User | null = null;
 const currentUserListeners: ((user: User | null) => void)[] = [];
 
-// Get the current user, this is fetched and set when the user logs in, and unset when the user logs out
-export function getCurrentUser() { return  _currentUser; }
+// Create the context with an initial null value
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Define the AuthProvider component
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const currentUser = useCurrentUser(); // Subscribe to global current user changes
+
+  // Initialize the current user
+  useEffect(() => {
+    if (!currentUserInitialized) {
+      initializeCurrentUser();
+      currentUserInitialized = true;
+    }
+  }, []);
+
+  return (
+    <AuthContext.Provider value={currentUser}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+/*
+  Pure functions to interact with the server
+*/
+
+function initializeCurrentUser() {
+
+  console.log('Initializing current user...');
+
+  // Check if the access token is stored in local storage
+  const accessToken = localStorage.getItem('access_token');
+
+  if (!accessToken) {
+    return;
+  }
+
+  // Get the expiration time of the access token
+  getExpirationTime(accessToken)
+    .then((timeUntilExpiration) => {
+      // Set refresh timer
+      setRefreshTimer(timeUntilExpiration);
+    })
+    .catch((error) => {
+      console.error('Failed to get expiration time', error);
+    });
+}
 
 export function isLoggedIn(): boolean {
   // Check if the access token is stored in local storage
@@ -38,8 +88,6 @@ async function setTokens(accessToken: string, refreshToken?: string) {
     throw new Error('No token provided');
   }
 
-  // Stop the refresh timer
-  stopRefreshTimer();
 
   // Update the stored access token if needed
   localStorage.setItem('access_token', accessToken);
@@ -52,22 +100,30 @@ async function setTokens(accessToken: string, refreshToken?: string) {
   // Get the expiration time of the access token
   const timeUntilExpiration = await getExpirationTime(accessToken);
 
-  console.log('Access token set, expires in', timeUntilExpiration, 'seconds');
+  // Set refresh timer
+  setRefreshTimer(timeUntilExpiration);
 
+  console.log('Access token refresh timer set');
+}
+
+function setRefreshTimer(timeUntilExpiration: number) {
   // Set the timer to refresh the token one minute before expiration
   const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
 
+  // Stop the refresh timer, if it is already set
+  stopRefreshTimer();
+
+  // Set the refresh token refresh timer
   accessTokenRefreshTimeout = setTimeout(async () => {
     accessTokenRefreshTimeout = null;
     try {
       const newToken = await refreshAccessToken();
       setTokens(newToken);
+      timeUntilExpiration = await getExpirationTime(newToken);
     } catch (error) {
       console.error('Failed to refresh access token', error);
     }
   }, refreshTimeMs);
-
-  console.log('Access token refresh timer set');
 }
 
 async function refreshAccessToken(): Promise<string> {

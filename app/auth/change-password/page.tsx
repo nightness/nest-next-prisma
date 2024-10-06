@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
-import { changePassword, isLoggedIn } from '@/utils/auth';
+import { changePassword, isLoggedIn } from '../provider';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');

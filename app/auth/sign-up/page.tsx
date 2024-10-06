@@ -3,9 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { serverFetch } from '@/utils/serverFetch';
 import styles from '../(styles)/auth.module.css';
-import { signUp } from '@/utils/auth';
+import { signUp } from '../provider';
 
 export default function SignUp() {
   const [email, setEmail] = useState('');

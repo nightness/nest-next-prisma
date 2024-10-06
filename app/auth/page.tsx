@@ -3,10 +3,10 @@
 
 import Link from 'next/link';
 import styles from '../(styles)/app.module.css';
-import { getCurrentUser } from '@/utils/auth';
+import { useCurrentUser } from './provider';
 
 export default function AuthIndexPage() {
-  const currentUser = getCurrentUser();
+  const currentUser = useCurrentUser();
   return (
     <main className={styles.main}>
       <h1 className={styles.title}>E-Mail Based User Authentication</h1>
