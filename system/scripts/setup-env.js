@@ -1,14 +1,11 @@
-const fs = require('fs');
+const { copyFileSync, constants } = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 const envPath = path.resolve('.env');
 const dotenvInitPath = path.resolve('system/dotenv-init');
 
 if (!fs.existsSync(envPath)) {
-  console.log('.env file not found. Copying from system/dotenv-init...');
-  execSync(`cp -r ${dotenvInitPath}/* ./`, { stdio: 'inherit' });
-  console.log('.env setup complete.');
-} else {
-  console.log('.env file already exists.');
+  copyFileSync(`${dotenvInitPath}/.env`, './.env', constants.COPYFILE_EXCL);
+  copyFileSync(`${dotenvInitPath}/.env.docker`, './.env.docker', constants.COPYFILE_EXCL);
+  copyFileSync(`${dotenvInitPath}/.env.docker.dev`, './.env.docker.dev', constants.COPYFILE_EXCL);
 }
