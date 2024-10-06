@@ -1,8 +1,8 @@
+// app/auth/provider.tsx
 "use client";
 
 import { getExpirationTime } from "@/utils/jwt";
 import { serverFetch } from "@/utils/serverFetch";
-// app/auth/provider.tsx
 import { User } from "@prisma/client";
 import React, { createContext, use } from "react";
 import { useEffect, useState } from 'react';
