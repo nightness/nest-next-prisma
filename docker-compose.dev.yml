@@ -11,6 +11,8 @@ services:
     depends_on:
       - redis
       - mysql
+    networks:
+      - app-net      
     # Use a custom command to wait for the MySQL service to be ready, then push the schema and start the app
     # NOTE: Running in hybrid mode
     command: >
@@ -36,6 +38,8 @@ services:
     image: 'redis:latest'
     volumes:
       - redis-data:/data
+    networks:
+      - app-net      
     expose:
       - '6379'
     ports:
@@ -47,6 +51,8 @@ services:
       - .env.docker.dev
     volumes:
       - mysql-data:/var/lib/mysql
+    networks:
+      - app-net      
     expose:
       - '3306'
     ports:
@@ -54,3 +60,7 @@ services:
 volumes:
   mysql-data:
   redis-data:
+
+networks:
+  app-net:
+    driver: bridge
