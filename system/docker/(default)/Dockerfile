@@ -1,0 +1,40 @@
+# Stage 1: Build the application
+FROM node:18-alpine AS builder
+RUN apk add --no-cache make g++ python3
+WORKDIR /usr/src/app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+COPY prisma ./prisma/
+COPY system ./system/
+RUN npm install
+RUN npm rebuild bcrypt
+RUN npx prisma generate
+
+# Copy the rest of the source code
+COPY . .
+
+# Build both NestJS and Next.js applications
+RUN npm run build
+
+# Stage 2: Run the application
+FROM node:18
+WORKDIR /usr/src/app
+
+# Copy necessary files from the builder stage
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/.next ./.next
+COPY --from=builder /usr/src/app/.nest ./.nest
+COPY --from=builder /usr/src/app/prisma ./prisma
+COPY --from=builder /usr/src/app/public ./public
+COPY --from=builder /usr/src/app/system ./system
+
+# Install netcat (openbsd version) with apk
+RUN apk add --no-cache netcat-openbsd
+
+# Expose port
+EXPOSE 3000
+
+# Set the default command
+CMD ["npm", "run", "start"]
