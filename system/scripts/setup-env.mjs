@@ -8,7 +8,7 @@ import path from 'path';
 
 function main() {
   // These files are not copied to the container (so they wont exist in the container when running install)
-  // Docker will handle its environment internally from the .env.docker files
+  // Docker will handle its environment internally from the .env.docker files existing in the project root
   if (isDocker()) {
     return;
   }
@@ -25,12 +25,15 @@ function main() {
   // Copy the .env files if they don't exist
   const dotenvInitPath = path.resolve('system/dotenv-init');
   if (!existsSync(envPath)) {
+    console.log('Copying default .env file to project root...');
     copyFileSync(`${dotenvInitPath}/.env`, './.env', constants.COPYFILE_EXCL);
   }
   if (!noDocker && !existsSync(envDockerPath)) {
+    console.log('Copying default .env.docker file to project root...');
     copyFileSync(`${dotenvInitPath}/.env.docker`, './.env.docker', constants.COPYFILE_EXCL);
   }
   if (!noDocker && !existsSync(envDockerDevPath)) {
+    console.log('Copying default .env.docker.dev file to project root...');
     copyFileSync(`${dotenvInitPath}/.env.docker.dev`, './.env.docker.dev', constants.COPYFILE_EXCL);
   }
 }
