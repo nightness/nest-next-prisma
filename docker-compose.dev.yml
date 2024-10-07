@@ -21,6 +21,9 @@ services:
           sleep 1;
         done;
         echo 'MySQL is up and running!';
+
+        # Drop the database using Prisma before continuing
+        # npx prisma db execute --url '$DATABASE_URL' --script 'DROP DATABASE IF EXISTS \`mydb\`; CREATE DATABASE \`mydb\`;'
         
         # Use db push for development; for production, consider migrate deploy
         npx prisma db push;

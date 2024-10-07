@@ -3,7 +3,7 @@ import isDocker from 'is-docker';
 import { constants, copyFileSync, existsSync } from 'fs';
 import path from 'path';
 
-// This script is run after running `npm install`
+// This is the 'prepare' script, it runs automatically after running `npm install`
 // Currently, it copies the .env files to the root of the project if they don't exist
 
 function main() {
