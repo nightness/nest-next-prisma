@@ -1,23 +1,30 @@
 #!/usr/bin/env node
 
 const { Command } = require('commander');
-const inquirer = require('inquirer');
+const inquirer = require('inquirer').default || require('inquirer');
 const fs = require('fs');
 const child_process = require('child_process');
 const path = require('path');
 
 const program = new Command();
 
+// List of supported providers
+const supportedProviders = ['postgresql', 'mysql', 'sqlite', 'sqlserver', 'mongodb', 'cockroachdb'];
+
 program
   .requiredOption('--provider <type>', 'Specify the database provider')
-  .option('--defaults', 'Use default settings (non-interactive)');
+  .option('--defaults', 'Use default settings (non-interactive)')
+  .addHelpText('after', `
+Available providers:
+  ${supportedProviders.join('\n  ')}
+`);
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-// List of supported providers
-const supportedProviders = ['postgresql', 'mysql', 'sqlite', 'sqlserver', 'mongodb', 'cockroachdb'];
+// List of .env files to update
+const envFiles = ['.env', '.env.docker', '.env.docker.dev'];
 
 async function main() {
   let provider = options.provider;
@@ -27,6 +34,8 @@ async function main() {
     process.exit(1);
   }
 
+  let databaseUrl = '';
+
   if (!options.defaults) {
     // Interactive mode
     const providerAnswer = await inquirer.prompt([
@@ -35,8 +44,8 @@ async function main() {
         name: 'provider',
         message: 'Select a database provider',
         choices: supportedProviders,
-        default: provider
-      }
+        default: provider,
+      },
     ]);
 
     provider = providerAnswer.provider;
@@ -47,32 +56,33 @@ async function main() {
         type: 'input',
         name: 'address',
         message: 'Database Address (e.g., localhost:5432)',
-        default: 'localhost'
+        default: 'localhost',
       },
       {
         type: 'input',
         name: 'user',
         message: 'Database User',
-        default: 'user'
+        default: 'user',
       },
       {
         type: 'password',
         name: 'password',
         message: 'Database Password',
-        mask: '*'
+        mask: '*',
       },
       {
         type: 'input',
         name: 'database',
         message: 'Database Name',
-        default: 'mydb'
-      }
+        default: 'mydb',
+      },
     ];
 
     const dbAnswers = await inquirer.prompt(dbQuestions);
 
+    // FIXME: Move the switch statement to a reusable function to remove code duplication
+
     // Compose the DATABASE_URL
-    let databaseUrl = '';
     switch (provider) {
       case 'postgresql':
         databaseUrl = `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
@@ -81,7 +91,7 @@ async function main() {
         databaseUrl = `mysql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
         break;
       case 'sqlite':
-        databaseUrl = `file:${dbAnswers.database}.db`;
+        databaseUrl = `file:./${dbAnswers.database}.db`;
         break;
       case 'sqlserver':
         databaseUrl = `sqlserver://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address};database=${dbAnswers.database}`;
@@ -96,32 +106,63 @@ async function main() {
         console.error(`Unsupported provider: ${provider}`);
         process.exit(1);
     }
+  } else {
+    // Non-interactive mode: Set default DATABASE_URL based on provider
+    // FIXME: USE THE DEFAULT
+    switch (provider) {
+      case 'postgresql':
+        databaseUrl = 'postgresql://user:password@localhost:5432/mydb';
+        break;
+      case 'mysql':
+        databaseUrl = 'mysql://user:password@localhost:3306/mydb';
+        break;
+      case 'sqlite':
+        databaseUrl = 'file:./dev.db';
+        break;
+      case 'sqlserver':
+        databaseUrl = 'sqlserver://user:password@localhost:1433;database=mydb';
+        break;
+      case 'mongodb':
+        databaseUrl = 'mongodb://user:password@localhost:27017/mydb';
+        break;
+      case 'cockroachdb':
+        databaseUrl = 'postgresql://user:password@localhost:26257/mydb?sslmode=verify-full';
+        break;
+      default:
+        console.error(`Unsupported provider: ${provider}`);
+        process.exit(1);
+    }
+    console.log(`Using default DATABASE_URL for provider: ${provider}`);
+  }
 
-    // Update the .env file
-    const envFilePath = path.resolve(process.cwd(), '.env');
+  // Update the .env files
+  for (const envFileName of envFiles) {
+    const envFilePath = path.resolve(process.cwd(), envFileName);
     let envFileContent = '';
+
     if (fs.existsSync(envFilePath)) {
       envFileContent = fs.readFileSync(envFilePath, 'utf8');
-    }
-
-    // Update or add the DATABASE_URL variable
-    const envLines = envFileContent.split('\n');
-    let databaseUrlSet = false;
-    for (let i = 0; i < envLines.length; i++) {
-      if (envLines[i].startsWith('DATABASE_URL=')) {
-        envLines[i] = `DATABASE_URL="${databaseUrl}"`;
-        databaseUrlSet = true;
-        break;
+      // Update or add the DATABASE_URL variable
+      const envLines = envFileContent.split('\n');
+      let databaseUrlSet = false;
+      for (let i = 0; i < envLines.length; i++) {
+        if (envLines[i].startsWith('DATABASE_URL=')) {
+          envLines[i] = `DATABASE_URL="${databaseUrl}"`;
+          databaseUrlSet = true;
+          break;
+        }
       }
-    }
-    if (!databaseUrlSet) {
-      envLines.push(`DATABASE_URL="${databaseUrl}"`);
-    }
+      if (!databaseUrlSet) {
+        envLines.push(`DATABASE_URL="${databaseUrl}"`);
+      }
 
-    fs.writeFileSync(envFilePath, envLines.join('\n'), 'utf8');
-    console.log(`Updated .env file with DATABASE_URL`);
-  } else {
-    console.log(`Using defaults, no changes made to .env file.`);
+      fs.writeFileSync(envFilePath, envLines.join('\n'), 'utf8');
+      console.log(`Updated ${envFileName} with DATABASE_URL`);
+    } else {
+      // Create the .env file with DATABASE_URL if it doesn't exist
+      fs.writeFileSync(envFilePath, `DATABASE_URL="${databaseUrl}"\n`, 'utf8');
+      console.log(`Created ${envFileName} with DATABASE_URL`);
+    }
   }
 
   // Update the schema.prisma file
@@ -133,9 +174,23 @@ async function main() {
 
   let schemaContent = fs.readFileSync(schemaFilePath, 'utf8');
 
+  // Regex to find the datasource block
+  const datasourceRegex = /datasource\s+\w+\s+\{[^}]*\}/gm;
+  const datasourceMatch = schemaContent.match(datasourceRegex);
+
+  if (!datasourceMatch) {
+    console.error('Could not find the datasource block in schema.prisma');
+    process.exit(1);
+  }
+
+  let datasourceBlock = datasourceMatch[0];
+
   // Regex to find provider in datasource block
   const providerRegex = /provider\s*=\s*".*?"/;
-  schemaContent = schemaContent.replace(providerRegex, `provider = "${provider}"`);
+  datasourceBlock = datasourceBlock.replace(providerRegex, `provider = "${provider}"`);
+
+  // Replace the old datasource block with the updated one
+  schemaContent = schemaContent.replace(datasourceRegex, datasourceBlock);
 
   fs.writeFileSync(schemaFilePath, schemaContent, 'utf8');
   console.log(`Updated schema.prisma with provider: ${provider}`);
