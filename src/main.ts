@@ -29,20 +29,25 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
 
   // Enable the hybrid environment and run Next.js as middleware (defaults to true)
   if (!noHybrid && HYBRID_ENV) {
-    const nextApp = Next({ dev, conf: nextConfig, dir: './' });
-    const handle = nextApp.getRequestHandler();
-    await nextApp.prepare();
-
     // Set global prefix for API routes
     app.setGlobalPrefix('api');
 
-    // Middleware to handle Next.js routing
-    app.use((req: Request, res: Response, next: NextFunction) => {
-      if (req.url.startsWith('/api') || req.url.startsWith('/swagger') || req.url.startsWith('/css')) {
-        return next();
-      }
-      return handle(req, res);
-    });
+    try {
+      const nextApp = Next({ dev, conf: nextConfig, dir: './' });
+      const handle = nextApp.getRequestHandler();
+      await nextApp.prepare();
+
+      // Middleware to handle Next.js routing
+      app.use((req: Request, res: Response, next: NextFunction) => {
+        if (req.url.startsWith('/api') || req.url.startsWith('/swagger') || req.url.startsWith('/css')) {
+          return next();
+        }
+        return handle(req, res);
+      });
+    } catch (error) {
+      console.error('Error starting Next.js:', error);
+      process.exit(1);
+    }
   }
 
   // Config Security Policy
