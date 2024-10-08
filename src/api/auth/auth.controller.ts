@@ -203,25 +203,24 @@ export class AuthController {
     try {
       const user = req.user;
       if (!user) {
-        response.status(HttpStatus.UNAUTHORIZED);
+        response.status(HttpStatus.UNAUTHORIZED).json({ message: 'Unauthorized' });
         return;
       }
   
       const uid = user.sub;
-      const deleted = await this.authService.deleteAccount(
-        uid,
-        password,
-      );
+      const deleted = await this.authService.deleteAccount(uid, password);
       if (!deleted) {
-        response.status(HttpStatus.UNAUTHORIZED);
+        response.status(HttpStatus.UNAUTHORIZED).json({ message: 'Incorrect password' });
       } else {
-        response.status(HttpStatus.OK);
+        response.status(HttpStatus.OK).json({ message: 'Account deleted successfully' });
       }
     } catch (e) {
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR);
+      response
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: 'An error occurred while deleting the account' });
     }
   }
-
+  
   // FIXME: Add a GET method for the password reset page
   @Get('password-reset/success')
   completedPasswordResetRequest() {
