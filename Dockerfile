@@ -1,6 +1,5 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS builder
-RUN apk add --no-cache make g++ python3
+FROM node:18 AS builder
 WORKDIR /usr/src/app
 
 # Copy package files and install dependencies
@@ -8,7 +7,6 @@ COPY package*.json ./
 COPY prisma ./prisma/
 COPY system ./system/
 RUN npm install
-RUN npm rebuild bcrypt
 RUN npx prisma generate
 
 # Copy the rest of the source code
@@ -30,8 +28,8 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder /usr/src/app/system ./system
 
-# Install netcat (openbsd version) with apk
-RUN apk add --no-cache netcat-openbsd
+# Install netcat-openbsd
+RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Expose port
 EXPOSE 3000

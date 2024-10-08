@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import {
   ACCESS_TOKEN_EXPIRATION, 
@@ -287,6 +287,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
       await this.redisService.deleteToken(refreshToken);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       throw new UnauthorizedException('Invalid refresh token: ', error.message);
     }

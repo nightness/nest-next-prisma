@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -70,9 +70,9 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 
-async function comparePassword(
-  enteredPassword: string,
-  storedPasswordHash: string,
-): Promise<boolean> {
-  return bcrypt.compare(enteredPassword, storedPasswordHash);
-}
+// async function comparePassword(
+//   enteredPassword: string,
+//   storedPasswordHash: string,
+// ): Promise<boolean> {
+//   return bcrypt.compare(enteredPassword, storedPasswordHash);
+// }

@@ -7,12 +7,12 @@ services:
       - '3000:3000'
     volumes:
       - ./:/usr/src/app
-      - /usr/src/app/node_modules # Prevent overwriting node_modules
+      # - /node_modules # Isolate node_modules outside the application volume
     depends_on:
       - redis
       - mysql
     networks:
-      - app-net      
+      - app-net
     # Use a custom command to wait for the MySQL service to be ready, then push the schema and start the app
     # NOTE: Running in hybrid mode
     command: >
