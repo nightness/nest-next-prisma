@@ -159,25 +159,22 @@ export class AuthController {
     type: ChangePasswordDto,
     required: true,
     description: 'User password details',
-    schema: {
-      format: 'object',
-      properties: {
-        currentPassword: { type: 'string' },
-        newPassword: { type: 'string' },
-      },
-    },
   })
-  @ApiResponse({ status: 204, description: 'Password changed' })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed and new tokens issued',
+    type: LoginResponseDto,
+  })
   async changePassword(
     @Req() req: Request,
     @Body() changePasswordDto: ChangePasswordDto,
   ): Promise<LoginResponseDto> {
     const user = req.user;
-
+  
     if (!user) {
       throw new UnauthorizedException('Invalid user');
     }
-
+  
     const uid = user.sub;
     return await this.authService.changePassword(
       uid,
@@ -185,7 +182,7 @@ export class AuthController {
       changePasswordDto.newPassword,
     );
   }
-
+  
   @Delete('delete')
   @ApiOperation({ summary: "Delete a user's account" })
   @UseGuards(AuthenticatedUserGuard)
