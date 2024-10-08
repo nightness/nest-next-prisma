@@ -112,18 +112,10 @@ export class AuthController {
       },
     },
   })
-  async logout(
-    @Body('refreshToken') refreshToken: string,
-    @Res() response: Response,
-  ): Promise<void> {
-    try {
-      await this.authService.deleteRefreshToken(refreshToken);
-      response.status(HttpStatus.NO_CONTENT).send();
-    } catch (e) {
-      response.status(HttpStatus.NOT_FOUND).send();
-    }
+  async logout(@Body('refreshToken') refreshToken: string): Promise<void> {
+    await this.authService.deleteRefreshToken(refreshToken);
   }
-
+  
   @Post('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({
