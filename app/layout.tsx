@@ -1,14 +1,16 @@
-import { AuthProvider } from "./auth/provider"
+// layout.tsx
+import { AuthProvider } from './auth/provider';
+import './(styles)/globals.css';
 
 export const metadata = {
-  title: 'Next.js + Nest + Prisma + TypeScript + Jest + ESLint + Prettier + Docker + PWA',
+  title: 'Full Stack PWA Starter Template',
   description: 'The React Stack for Production',
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -16,5 +18,5 @@ export default function RootLayout({
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
-  )
+  );
 }

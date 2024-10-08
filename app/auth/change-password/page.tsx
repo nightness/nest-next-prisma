@@ -1,15 +1,16 @@
-"use client";
+// auth/change-password/page.tsx
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../(styles)/auth.module.css';
+
 import { changePassword, isLoggedIn } from '../provider';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
   const router = useRouter();
 
   if (!isLoggedIn()) {
@@ -21,34 +22,37 @@ export default function ChangePassword() {
     e.preventDefault();
     try {
       await changePassword(currentPassword, newPassword);
-      setSuccess('Password successfully changed.');
+      setMessage('Password successfully changed.');
     } catch (err: any) {
-      setError(err.message || 'Unable to change password.');
+      setMessage(err.message || 'Unable to change password.');
     }
   };
 
   return (
-    <form onSubmit={handleChangePassword} className={styles.form}>
-      <h1 className={styles.title}>Change Password</h1>
-      <input
-        type="password"
-        value={currentPassword}
-        onChange={(e) => setCurrentPassword(e.target.value)}
-        placeholder="Current Password"
-        required
-        className={styles.input}
-      />
-      <input
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder="New Password"
-        required
-        className={styles.input}
-      />
-      <button type="submit" className={styles.button}>Change Password</button>
-      {error && <p className={styles.error}>{error}</p>}
-      {success && <p className={styles.success}>{success}</p>}
-    </form>
+    <div className={styles['form-container']}>
+      <h1 className={styles['form-title']}>Change Password</h1>
+      <form onSubmit={handleChangePassword}>
+        <input
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="Current Password"
+          required
+          className={styles.input}
+        />
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="New Password"
+          required
+          className={styles.input}
+        />
+        <button type="submit" className={styles.button}>
+          Change Password
+        </button>
+        {message && <p className={styles.message}>{message}</p>}
+      </form>
+    </div>
   );
 }

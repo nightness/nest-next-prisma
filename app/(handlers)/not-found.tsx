@@ -1,35 +1,28 @@
-// app/not-found.js
-import { headers } from 'next/headers';
+// handlers/not-found.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import styles from './(styles)/error.module.css';
+import utilStyles from '../(styles)/utilities.module.css';
 
 export default function NotFoundPage() {
-  const headersList = headers();
-  const referer = headersList.get('referer') || '';
-  const url = referer || '';
-
   return (
-    <div>
-      <h1>Sorry, I couldn't find what you were looking for</h1>
-      <h3>{url}</h3>
-      <section className="error-container">
-        <span>4</span>
-        <span>
-          <span className="screen-reader-text">0</span>
-        </span>
-        <span>4</span>
-      </section>
-      <p className="zoom-area">
+    <div className={styles.container}>
+      <h1 className={styles.title}>Page Not Found</h1>
+      <p className={styles.message}>
+        Sorry, the page you're looking for doesn't exist.
+      </p>
+      <div className={styles['error-code']}>404</div>
+      <div className={styles['image-container']}>
         <Image
           src="/images/EmojiShrug.png"
           alt="Emoji Shrug"
-          width={200}
-          height={200}
+          width={150}
+          height={150}
         />
-      </p>
-      <div className="link-container">
-        <Link href="https://google.com/" className="more-link">
-          Go to Google
+      </div>
+      <div className={styles['link-container']}>
+        <Link href="/" className={utilStyles.button}>
+          Go Home
         </Link>
       </div>
     </div>

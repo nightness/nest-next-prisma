@@ -1,56 +1,33 @@
-// app/error.js
+// handlers/error.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import styles from './(styles)/error.module.css';
+import utilStyles from '../(styles)/utilities.module.css';
 
-export default function Error({ error, reset } : {
-  error: Error;
-  reset: () => void;
-}) {
-  const [url, setUrl] = useState('');
-
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
     console.error(error);
-    if (typeof window !== 'undefined') {
-      setUrl(window.location.href);
-    }
   }, [error]);
 
-  const statusCode = 500;
-  const exceptionMessage = error?.message || '';
-
   return (
-    <div>
-      <h1>This is embarrassing. We are having some server issues.</h1>
-      <h3>URL: {url}</h3>
-      <h3>Status Code: {statusCode}</h3>
-      {exceptionMessage && <h3>Message: {exceptionMessage}</h3>}
-      <div
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          margin: '0 auto',
-          width: '100%',
-          maxWidth: '600px',
-          fontSize: 'larger',
-        }}
-      >
-        <pre>{exceptionMessage}</pre>
-        <br />
+    <div className={styles.container}>
+      <h1 className={styles.title}>Server Error</h1>
+      <p className={styles.message}>We're sorry, something went wrong.</p>
+      <div className={styles['error-code']}>500</div>
+      <div className={styles['image-container']}>
+        <Image
+          src="/images/EmojiShrug.png"
+          alt="Emoji Shrug"
+          width={150}
+          height={150}
+        />
       </div>
-      <section className="error-container">
-        <span>5</span>
-        <span>
-          <span className="screen-reader-text">0</span>
-        </span>
-        <span>0</span>
-      </section>
-      <div className="link-container">
-        <Link href="https://google.com/" className="more-link">
-          Go to Google
+      <div className={styles['link-container']}>
+        <Link href="/" className={utilStyles.button}>
+          Go Home
         </Link>
       </div>
     </div>

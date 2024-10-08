@@ -1,8 +1,7 @@
-// app/tasks/page.tsx
-
+// page.tsx
 import React from 'react';
 import Link from 'next/link';
-import styles from './(styles)/app.module.css';
+import styles from './(styles)/home.module.css';
 
 const features = [
   {
@@ -52,29 +51,27 @@ export default function HomePage() {
       </p>
 
       <div className={styles.features}>
-        <div className={styles.feature}>
-          <div className={styles.footer}>
-            <p>
-              Get started by editing <code>app/page.tsx</code>
-            </p>
-            <Link href="/api/hello">Visit API Endpoint</Link>
-            {' | '}
-            <Link href="/swagger">View Swagger Docs</Link>
-            {' | '}
-            <Link href="/tasks">Task List Example</Link>
-            {' | '}
-            <Link href="/auth">Authentication Pages</Link>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.features}>
         {features.map((feature) => (
           <div key={feature.title} className={styles.feature}>
             <h2>{feature.title}</h2>
             <p>{feature.description}</p>
           </div>
         ))}
+      </div>
+
+      <div className={styles.footer}>
+        <Link href="/api/hello" className={styles.link}>
+          API Endpoint
+        </Link>
+        <Link href="/swagger" className={styles.link}>
+          Swagger Docs
+        </Link>
+        <Link href="/tasks" className={styles.link}>
+          Task List Example
+        </Link>
+        <Link href="/auth" className={styles.link}>
+          Authentication Pages
+        </Link>
       </div>
     </main>
   );

@@ -1,0 +1,61 @@
+/* styles/home.module.css */
+
+.main {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #0070f3;
+    margin-bottom: 1rem;
+  }
+  
+  .description {
+    text-align: center;
+    font-size: 1.25rem;
+    color: #555;
+    margin-bottom: 2rem;
+  }
+  
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .feature {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    transition: box-shadow 0.2s ease-in-out;
+  }
+  
+  .feature:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feature h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.5rem;
+    color: #0070f3;
+  }
+  
+  .footer {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  
+  .footer a {
+    color: #0070f3;
+    text-decoration: none;
+    margin: 0 0.5rem;
+  }
+  
+  .footer a:hover {
+    text-decoration: underline;
+  }
+  

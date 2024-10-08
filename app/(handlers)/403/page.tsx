@@ -1,39 +1,32 @@
-// app/403/page.js
-import { headers } from 'next/headers';
+// handlers/403/page.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import styles from '../(styles)/error.module.css';
+import utilStyles from '../../(styles)/utilities.module.css';
 
 export const metadata = {
   title: 'Forbidden',
 };
 
 export default function ForbiddenPage() {
-  const headersList = headers();
-  const referer = headersList.get('referer') || '';
-  const url = referer || '';
-
   return (
-    <div>
-      <h1>Sorry, you do not have permission to view this page</h1>
-      <h3>{url}</h3>
-      <section className="error-container">
-        <span>4</span>
-        <span>
-          <span className="screen-reader-text">0</span>
-        </span>
-        <span>3</span>
-      </section>
-      <p className="zoom-area">
+    <div className={styles.container}>
+      <h1 className={styles.title}>Access Denied</h1>
+      <p className={styles.message}>
+        You do not have permission to view this page.
+      </p>
+      <div className={styles['error-code']}>403</div>
+      <div className={styles['image-container']}>
         <Image
           src="/images/EmojiShrug.png"
           alt="Emoji Shrug"
-          width={300}
-          height={300}
+          width={150}
+          height={150}
         />
-      </p>
-      <div className="link-container">
-        <Link href="https://google.com/" className="more-link">
-          Go to Google
+      </div>
+      <div className={styles['link-container']}>
+        <Link href="/" className={utilStyles.button}>
+          Go Home
         </Link>
       </div>
     </div>
