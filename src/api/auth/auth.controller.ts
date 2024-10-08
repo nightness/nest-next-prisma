@@ -211,29 +211,7 @@ export class AuthController {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: 'An error occurred while deleting the account' });
     }
-  }
-  
-  // FIXME: Add a GET method for the password reset page
-  @Get('password-reset/success')
-  completedPasswordResetRequest() {
-    return {}; // No data to send to ejs renderer
-  }
-
-  // FIXME: Add a GET method for the password reset page
-  @Get('password-reset')
-  completePasswordResetRequest(@Query('token') token: string) {
-    // Check if the token is valid
-    if (!token) {
-      throw new BadRequestException('Missing token');
-    }
-
-    // Check if the token is a password reset token
-    if (!token.startsWith('pr_')) {
-      throw new BadRequestException('Invalid token');
-    }
-
-    return this.authService.completePasswordResetRequest(token);
-  }
+  }  
 
   @Post('password-reset')
   @ApiOperation({
