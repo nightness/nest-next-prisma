@@ -2,14 +2,16 @@
 // app/auth/page.tsx
 
 import Link from 'next/link';
-import styles from '../(styles)/app.module.css';
+import stylesApp from '../(styles)/app.module.css';
+import styles from '../auth/(styles)/auth.module.css';
+
 import { useCurrentUser } from './provider';
 
 export default function AuthIndexPage() {
   const currentUser = useCurrentUser();
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>E-Mail Based User Authentication</h1>
+    <div className={styles['form-container']} style={{ "maxWidth": '600px'}}>
+      <h1 className={styles['form-title']}>E-Mail Based User Authentication</h1>
       <h2>Current User: {currentUser ? currentUser.name : 'Not signed in'}</h2>
       <div className={styles.linkList}>
         <Link href="/auth/sign-up">
@@ -28,6 +30,6 @@ export default function AuthIndexPage() {
           <div className={styles.a}>Change Password</div>
         </Link>
       </div>
-    </main>
+    </div>
   );
 }
