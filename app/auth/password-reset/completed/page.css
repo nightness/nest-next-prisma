@@ -1,0 +1,34 @@
+.container {
+    text-align: center;
+  }
+  
+  #return-to-app,
+  #close-window {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+    text-decoration: none; /* No underline */
+    border-radius: 5px; /* Rounded corners */
+    display: none; /* Initially hidden, will be shown by JavaScript conditionally */
+    cursor: pointer;
+  }
+  
+  /* Styles for a clickable link appearance */
+  #return-to-app {
+    /* If 'Return to App' is specifically styled as a link */
+  }
+  
+  /* Styles for the 'Close Window' button */
+  #close-window {
+    border: none; /* No border for button */
+  }
+  
+  /* Additional hover styles for buttons when they are visible */
+  @media (hover: hover) {
+    #return-to-app:hover,
+    #close-window:hover {
+      background-color: #45a049; /* Darker green background on hover */
+    }
+  }
+  
