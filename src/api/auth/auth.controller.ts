@@ -75,6 +75,10 @@ export class AuthController {
     description: 'User logged in',
     type: LoginResponseDto,
   })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid email or password',
+  })
   @ApiBody({
     type: LoginDto,
     required: true,
