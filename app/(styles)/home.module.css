@@ -59,3 +59,29 @@
     text-decoration: underline;
   }
   
+  /* auth/page.tsx */
+/* (styles)/home.module.css */
+
+.header {
+  display: flex;
+  justify-content: center; /* Center the links horizontally */
+  gap: 20px; /* Space between links */
+  padding: 20px;
+  background-color: #f5f5f5; /* Light background for header */
+}
+
+.footer {
+  text-align: center;
+  padding: 10px;
+  background-color: #f5f5f5; /* Light background for footer */
+}
+
+.link {
+  text-decoration: none;
+  color: #0070f3;
+  font-size: 18px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

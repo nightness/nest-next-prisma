@@ -80,8 +80,8 @@ const watcher = (function () {
     return;
   }
 
-  // Initialize watcher.
-  const watcher = chokidar.watch(['./src', './prisma', './public'], {
+  // Initialize watcher. Removed /public because restart is not needed for the server to see that change.
+  const watcher = chokidar.watch(['./src', './prisma'], {
     persistent: true,
     ignoreInitial: true,
     usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers

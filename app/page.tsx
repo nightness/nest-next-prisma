@@ -14,7 +14,8 @@ const features = [
   },
   {
     title: 'Dockerized Environment',
-    description: 'Consistent development and production setups using Docker. The Docker development environment supports hot-reloading.',
+    description:
+      'Consistent development and production setups using Docker. The Docker development environment supports hot-reloading.',
   },
   {
     title: 'Hybrid Server',
@@ -45,6 +46,21 @@ const features = [
 export default function HomePage() {
   return (
     <main className={styles.main}>
+      <header className={styles.header}>
+        <Link href="/api/hello" className={styles.link}>
+          API Endpoint
+        </Link>
+        <Link href="/swagger" className={styles.link}>
+          Swagger Docs
+        </Link>
+        <Link href="/tasks" className={styles.link}>
+          Task List Example
+        </Link>
+        <Link href="/auth" className={styles.link}>
+          Authentication Pages
+        </Link>
+      </header>
+
       <h1 className={styles.title}>Full Stack PWA Starter Template</h1>
       <p className={styles.description}>
         A robust boilerplate combining Next.js, NestJS, Prisma, and Docker.
@@ -59,20 +75,9 @@ export default function HomePage() {
         ))}
       </div>
 
-      <div className={styles.footer}>
-        <Link href="/api/hello" className={styles.link}>
-          API Endpoint
-        </Link>
-        <Link href="/swagger" className={styles.link}>
-          Swagger Docs
-        </Link>
-        <Link href="/tasks" className={styles.link}>
-          Task List Example
-        </Link>
-        <Link href="/auth" className={styles.link}>
-          Authentication Pages
-        </Link>
-      </div>
+      <footer className={styles.footer}>
+        <p>© {new Date().getFullYear()}</p>
+      </footer>
     </main>
   );
 }

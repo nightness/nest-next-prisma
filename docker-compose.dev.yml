@@ -7,7 +7,6 @@ services:
       - '3000:3000'
     volumes:
       - ./:/usr/src/app
-      # - /node_modules # Isolate node_modules outside the application volume
     depends_on:
       - redis
       - mysql
