@@ -1,5 +1,7 @@
 // app/tasks/page.tsx
 
+export const dynamic = 'force-dynamic'; // Forces dynamic rendering
+
 import AddTaskForm from './AddTaskForm';
 import TaskList from './TaskList';
 
