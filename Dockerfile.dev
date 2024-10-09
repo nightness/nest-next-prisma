@@ -8,7 +8,6 @@ COPY package*.json ./
 COPY prisma ./prisma/
 COPY system ./system/
 RUN npm install
-RUN npm rebuild bcrypt
 RUN npx prisma generate
 
 # Copy the rest of the source code
