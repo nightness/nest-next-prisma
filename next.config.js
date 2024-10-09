@@ -1,5 +1,5 @@
 // next.config.js
-const withPWA = require('next-pwa')({
+const withPWA = require('"@ducanh2912/next-pwa"')({
   dest: 'public',
   // disable: process.env.NODE_ENV !== 'production',
   runtimeCaching: [
