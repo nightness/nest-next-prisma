@@ -30,13 +30,13 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "docker:build": "docker build -t test-app .",
-    "docker:migrate": "docker exec -it $(docker ps -qf \"name=test-app\") npm run migrate",
+    "docker:build": "docker build -t your-app .",
+    "docker:migrate": "docker exec -it $(docker ps -qf \"name=your-app\") npm run migrate",
     "docker:up": "docker-compose up -d",
     "docker:start": "docker-compose up --build",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:down": "docker-compose down && docker-compose -f docker-compose.dev.yml down",
-    "docker:shell": "docker exec -it test-app-1 /bin/sh",
+    "docker:shell": "docker exec -it your-app-1 /bin/sh",
     "docker:logs": "docker-compose logs -f"
   },
   "dependencies": {
