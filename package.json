@@ -11,7 +11,7 @@
     "dev": "node system/scripts/start-hybrid.js --watch",
     "dev:nest": "npx nest start --watch",
     "dev:next": "npx next dev",
-    "build": "rm -rf .nest .next && nest build -p tsconfig.build.json && next build",
+    "build": "rm -rf .nest .next && npx nest build -p tsconfig.build.json && npx next build",
     "build:nest": "npx nest build -p tsconfig.build.json",
     "build:next": "npx next build",
     "start": "node system/scripts/start-hybrid.js",
