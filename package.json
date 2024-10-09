@@ -37,7 +37,8 @@
     "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
     "docker:down": "docker-compose down && docker-compose -f docker-compose.dev.yml down",
     "docker:shell": "docker exec -it your-app-1 /bin/sh",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "docker:prune": "docker system prune"
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",

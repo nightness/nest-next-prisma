@@ -34,8 +34,8 @@ services:
       - app-net
     expose:
       - '6379'
-    sysctls:
-      vm.overcommit_memory: '1'      
+    # sysctls:
+    #  vm.overcommit_memory: '1'      
   mysql:
     image: 'mysql:8.0'
     command: --default-authentication-plugin=mysql_native_password
