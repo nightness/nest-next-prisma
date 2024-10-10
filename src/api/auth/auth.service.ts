@@ -22,7 +22,7 @@ import { UserService } from '../user/user.service';
 import { EjsService } from '../../modules/ejs/ejs.service';
 import { EmailerService } from '../../modules/emailer/emailer.service';
 import { RedisService } from '../../modules/redis/redis.service';
-import { User as ExpressUser } from '../../system/types';
+// import { User as ExpressUser } from '../../system/types';
 
 import { JwtPayload, LoginResponseDto } from './auth.types';
 
@@ -65,24 +65,6 @@ export class AuthService {
     }
 
     return { token, validationErrors: [] }; // Data passed to the view
-  }
-
-  async completePasswordResetPost(
-    token: string,
-    password: string,
-  ): Promise<void> {
-    // Get the user ID associated with the token
-    const userId = await this.redisService.get(token);
-    if (!userId) {
-      throw new BadRequestException('Invalid or expired token');
-    }
-
-    // Hash the password and update the user record
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await this.userService.update(userId, { password: hashedPassword });
-
-    // Delete all "pr" tokens for this user
-    await this.redisService.deleteTokens('pr', userId);
   }
 
   async deleteAccount(userId: string, password: string): Promise<boolean> {
@@ -313,33 +295,33 @@ export class AuthService {
     return this.userService.findById(userId);
   }
 
-  async validateUser(payload: JwtPayload): Promise<ExpressUser> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub, email: payload.email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        isActive: true,
-        isEmailVerified: true,
-        isAdmin: true,
-      },
-    });
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    if (!user.isActive) {
-      throw new UnauthorizedException('User is not active');
-    }
-    return {
-      id: user.id,
-      name: user.name!,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isEmailVerified: user.isEmailVerified,
-      isActive: user.isActive
-    };
-  }
+  // async validateUser(payload: JwtPayload): Promise<ExpressUser> {
+  //   const user = await this.prisma.user.findUnique({
+  //     where: { id: payload.sub, email: payload.email },
+  //     select: {
+  //       id: true,
+  //       name: true,
+  //       email: true,
+  //       isActive: true,
+  //       isEmailVerified: true,
+  //       isAdmin: true,
+  //     },
+  //   });
+  //   if (!user) {
+  //     throw new UnauthorizedException();
+  //   }
+  //   if (!user.isActive) {
+  //     throw new UnauthorizedException('User is not active');
+  //   }
+  //   return {
+  //     id: user.id,
+  //     name: user.name!,
+  //     email: user.email,
+  //     isAdmin: user.isAdmin,
+  //     isEmailVerified: user.isEmailVerified,
+  //     isActive: user.isActive
+  //   };
+  // }
 
   private async createAuthTokens(user: User): Promise<LoginResponseDto> {
     const payload: JwtPayload = {
