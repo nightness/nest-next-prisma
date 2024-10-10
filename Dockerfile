@@ -28,8 +28,17 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder /usr/src/app/system ./system
 
-# Install netcat-openbsd
-RUN apt-get update && apt-get install -y netcat-openbsd
+# Install netcat-openbsd and set timezone
+RUN apt-get update && apt-get install -y netcat-openbsd tzdata
+
+#ENV TZ=America/New_York
+#ENV TZ=America/Chicago
+#ENV TZ=America/Denver
+#ENV TZ=America/Los_Angeles
+#ENV TZ=America/Anchorage
+#ENV TZ=Pacific/Honolulu
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Expose port
 EXPOSE 3000
