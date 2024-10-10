@@ -136,9 +136,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   // Look though the keys to determine how long the user has to wait before making another request
   // Or in other words, when does the first key in the array of keys expires first, and how long until then
   async waitTime(keys: string[]): Promise<{
-    waitTime: any;
-    waitMinutes: any;
-    waitHours: any;
+    waitTime: number;
+    waitMinutes: number;
+    waitHours: number;
   }> {
     let waitTime = 0;
     for (const key of keys) {
