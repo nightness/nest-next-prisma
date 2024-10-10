@@ -32,8 +32,8 @@ export default function AddTaskForm() {
         placeholder="New task title"
         style={{ padding: '0.5rem', width: '300px' }}
       />
-      <button type="submit" style={{ padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
-        {isPending ? 'Adding...' : 'Add Task'}
+      <button type="submit" style={{ padding: '0.5rem 1rem', marginLeft: '0.5rem' }} disabled={isPending}>
+        Add Task
       </button>
     </form>
   );
