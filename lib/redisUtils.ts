@@ -1,62 +1,16 @@
-import { Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { redis } from './redis';
 
+declare global {
+  // eslint-disable-next-line no-var
+  var redisUtils: RedisUtils | undefined;
+}
+
+// This is a stripped down version of the RedisUtils class that is used in src/modules/redis/redis.service.ts
 class RedisUtils  {
-  private readonly verboseLogging = false;
-  private logger = new Logger("Test");
-//   private pubSubClient: RedisClient;
-//   private expirationListener: ((expiredKey: string) => void)[] = [];
-
-  constructor(private readonly redis: Redis) {
-    // Create a new Redis connection for subscribing to events, as the main connection cannot be used for other commands while subscribed
-    // this.pubSubClient = new Redis({
-    //   host: process.env.REDIS_HOST as string,
-    //   port: Number(process.env.REDIS_PORT) || 6379,
-    // });
-  }
-
-  async onModuleInit() {
-    // Enable keyspace notifications
-    await this.redis.config('SET', 'notify-keyspace-events', 'AKEx');
-
-    // Subscribe to all keyspace events
-    // this.pubSubClient.psubscribe('__keyspace@0__:*', (err, count) => {
-    //   if (err) {
-    //     this.logger.error('Failed to subscribe to keyspace events', err);
-    //     return;
-    //   }
-    //   this.logger.log(`Subscribed to ${count} keyspace event channel${count === 1 ? '' : 's'}.`);
-    // });
-
-    // Handle incoming keyspace events
-    // this.pubSubClient.on('pmessage', (pattern, channel, message) => {
-    //   // `channel` will look something like '__keyspace@0__:mykey'
-    //   const key = channel.slice(channel.indexOf(':') + 1);
-
-    //   if (this.verboseLogging) {
-    //     if (message === 'set') {
-    //       this.logger.log(`Key set: ${key}`);
-    //     } else if (message === 'expire') {
-    //       this.logger.log(`Key expire: ${key}`);
-    //     } else if (message === 'expired') {
-    //       this.logger.log(`Key expired: ${key}`);
-    //     } else if (message === 'del') {
-    //       this.logger.log(`Key del: ${key}`);
-    //     }
-    //   }
-    //   if (message === 'expired') {
-    //     this.expirationListener.forEach((cb) => cb(key));
-    //   }
-    // });
-
-    if (this.verboseLogging) {
-      for await (const key of this.generateAllKeys()) {
-        /// Process each key here
-        this.logger.log(`Existing Key: ${key}`);
-      }
-    }
-  }
+  constructor(
+    private readonly redis: Redis
+  ) {}
 
   use(): Redis {
     return this.redis;
@@ -64,38 +18,6 @@ class RedisUtils  {
 
   async getAllKeys(): Promise<string[]> {
     return await this.redis.keys('*'); // This will match all keys
-  }
-
-  /*
-    /// Example Usage
-     redisService = new RedisService();
-
-    async processKeys() {
-        for await (const key of this.redisService.generateAllKeys()) {
-            /// Process each key here
-            console.log(key);
-        }
-    }
-   */
-  async *generateAllKeys() {
-    let cursor = '0';
-
-    do {
-      // Use the SCAN command with the current cursor
-      const reply: [string, string[]] = await this.redis.scan(
-        cursor,
-        'MATCH',
-        '*',
-        'COUNT',
-        100,
-      );
-      cursor = reply[0]; // Update the cursor to the next cursor value
-
-      // Yield each key found in this batch
-      for (const key of reply[1]) {
-        yield key;
-      }
-    } while (cursor !== '0'); // Continue until the cursor returns to 0
   }
 
   async saveToken(token: string, userId: string, ttl: number) {
@@ -144,20 +66,6 @@ class RedisUtils  {
       waitHours,
     };
   }
-
-  /// Subscribe to key expiration events
-  /// @param cb - Callback function to be called when a key expires
-  /// @returns Function to unsubscribe from the event
-//   async subscribeToExpirationEvents(
-//     cb: (expiredKey: string) => void,
-//   ): Promise<() => void> {
-//     this.expirationListener.push(cb);
-//     return () => {
-//       this.expirationListener = this.expirationListener.filter(
-//         (listener) => listener !== cb,
-//       );
-//     };
-//   }
 
   async getOrSetCache<T>(
     key: string,
@@ -249,4 +157,9 @@ class RedisUtils  {
   }
 }
 
-export default new RedisUtils(redis);
+const redisUtils = global.redisUtils || new RedisUtils(redis);
+
+// Assign the Redis utils to the global object in development to prevent multiple instances
+if (process.env.NODE_ENV !== 'production') global.redisUtils = redisUtils;
+
+export default redisUtils;

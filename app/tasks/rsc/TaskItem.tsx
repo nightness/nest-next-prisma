@@ -1,18 +1,17 @@
 // app/tasks/TaskItem.tsx
-
 'use client';
 
 import { Task } from '@prisma/client';
 import { useTransition } from 'react';
-import { toggleTask, deleteTask } from './serverActions';
 import { useRouter } from 'next/navigation';
+import { toggleTask, deleteTask } from './serverActions';
 
 interface TaskItemProps {
   task: Task;
 }
 
 export default function TaskItem({ task }: TaskItemProps) {
-  const [isPending, startTransition] = useTransition();
+  const [,startTransition] = useTransition();
   const router = useRouter();
 
   const handleToggle = () => {

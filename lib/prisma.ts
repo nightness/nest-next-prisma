@@ -11,7 +11,7 @@ declare global {
 export const prisma =
   global.prisma ||
   new PrismaClient({
-    log: ['query'],
+    // log: ['query'],
   });
 
 // Assign the prisma object to the `global` object if it doesn't exist
