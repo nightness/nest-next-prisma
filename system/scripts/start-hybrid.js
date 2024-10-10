@@ -35,7 +35,8 @@ let processes = [];
 const activePromises = new Set();
 
 // Check if the script is running in watch mode
-const watch = process.argv.includes('--watch');
+const watch = process.argv.includes('--watch') || process.argv.includes('--watch-all');
+const watchAll = process.argv.includes('--watch-all');
 
 // Sanity check on arguments
 if (process.argv.length > 2 && !process.argv.includes('--watch')) {
@@ -82,6 +83,7 @@ const watcher = (function () {
 
   // Initialize watcher. Removed /public because restart is not needed for the server to see that change.
   const watcher = chokidar.watch(['./src', './prisma'], {
+    ignored: watchAll ? undefined : ['**/*.test.ts', '**/*.spec.ts', '**/*.d.ts', '**/*.spec.ts', '**/*.e2e-spec.ts'],
     persistent: true,
     ignoreInitial: true,
     usePolling: true,  // Use polling for better cross-platform support, particularly on network file systems or Docker containers
