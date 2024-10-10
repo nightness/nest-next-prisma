@@ -12,6 +12,9 @@ import configSwagger from './config/config.swagger';
 import * as nextConfig from '../next.config.js';
 import { HYBRID_ENV, NODE_ENV, SERVER_PORT } from './config/config.env';
 
+// Global prefix for API routes
+const GLOBAL_PREFIX = 'api';
+
 // Since the default is true, we can disable the hybrid environment by passing the --no-hybrid flag
 const noHybrid = process.argv.includes('--no-hybrid');
 
@@ -30,7 +33,7 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
   // Enable the hybrid environment and run Next.js as middleware (defaults to true)
   if (!noHybrid && HYBRID_ENV) {
     // Set global prefix for API routes
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix(GLOBAL_PREFIX);
 
     try {
       const nextApp = Next({ dev, conf: nextConfig, dir: './' });
@@ -39,9 +42,12 @@ NestFactory.create<NestExpressApplication>(AppModule).then(async (app) => {
 
       // Middleware to handle Next.js routing
       app.use((req: Request, res: Response, next: NextFunction) => {
-        if (req.url.startsWith('/api') || req.url.startsWith('/swagger') || req.url.startsWith('/css')) {
+        const isApiUrl = req.url.startsWith(`/${GLOBAL_PREFIX}`);
+        const isSwaggerUrl = req.url.startsWith('/swagger') || req.url.startsWith('/css');
+        if (isApiUrl || isSwaggerUrl) {
           return next();
         }
+        // Next.js handles all other routes
         return handle(req, res);
       });
     } catch (error) {
