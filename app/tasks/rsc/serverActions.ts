@@ -1,11 +1,13 @@
 // app/tasks/serverActions.ts
-
 'use server';
+import "server-only";
 
-import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
+import { prisma } from 'lib/prisma';
 
-const prisma = new PrismaClient();
+export async function getTasks() {
+  return prisma.task.findMany();
+}
 
 export async function createTask(title: string) {
   await prisma.task.create({ data: { title, completed: false } });
