@@ -23,68 +23,6 @@ interface ExpirationInfo {
   asString: string;
 }
 
-// Utility function to validate email format
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^\S+@\S+\.\S+$/;
-  return emailRegex.test(email);
-}
-
-// Utility function to validate password strength
-function isStrongPassword(password: string): boolean {
-  // Implement password strength criteria as needed
-  return password.length >= 8;
-}
-
-// Find user by email
-async function findUserByEmail(email: string): Promise<User | null> {
-  const user = await prisma.user.findUnique({ where: { email } });
-  return user;
-}
-
-// Create verification email token
-async function createVerifyEmailToken(user: User): Promise<string> {
-  const token = generateRandomToken('ve');
-
-  // Save token to Redis with the token as key and user.id as value
-  await redisUtils.saveToken(
-    token,
-    user.id,
-    EMAIL_VERIFICATION_TOKEN_EXPIRATION
-  );
-
-  return token;
-}
-
-// Check for maximum concurrent email verification requests
-async function getFirstExpirationTime(
-  prefix: string,
-  userId: string,
-  maxRequests: number
-): Promise<ExpirationInfo | undefined> {
-  // Get all keys matching 've_*:{userId}'
-  const keys = await redisUtils.keys(`${prefix}_*:${userId}`);
-
-  if (keys.length >= maxRequests) {
-    // Calculate the maximum wait time
-    const { waitTime, waitMinutes, waitHours } =
-      await redisUtils.waitTime(keys);
-
-    const asString =
-      waitHours === 0
-        ? `Too many requests. Try again in ${waitMinutes} minutes.`
-        : `Too many requests. Try again in ${waitHours} hour(s) and ${waitMinutes} minute(s).`;
-
-    return {
-      waitTime,
-      waitHours,
-      waitMinutes,
-      asString,
-    };
-  }
-
-  return undefined;
-}
-
 // Send verification email
 export async function sendVerificationEmail(email: string): Promise<void> {
   if (!isValidEmail(email)) {
@@ -153,15 +91,6 @@ export async function verifyEmail(token: string): Promise<void> {
 
   // Delete all "ve" tokens for this user
   await redisUtils.deleteTokens('ve_', userId);
-}
-
-// Create password reset token
-async function createPasswordResetToken(user: User): Promise<string> {
-  const token = generateRandomToken('pr');
-
-  await redisUtils.saveToken(token, user.id, PASSWORD_RESET_TOKEN_EXPIRATION);
-
-  return token;
 }
 
 // Reset password using token
@@ -235,4 +164,75 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 function generateRandomToken(prefix?: string): string {
   const token = randomBytes(32).toString('hex');
   return prefix ? `${prefix}_${token}` : token; // Generates a 32-byte random string, converted to hexadecimal format
+}
+
+// Utility function to validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^\S+@\S+\.\S+$/;
+  return emailRegex.test(email);
+}
+
+// Utility function to validate password strength
+function isStrongPassword(password: string): boolean {
+  // Implement password strength criteria as needed
+  return password.length >= 8;
+}
+
+// Find user by email
+async function findUserByEmail(email: string): Promise<User | null> {
+  const user = await prisma.user.findUnique({ where: { email } });
+  return user;
+}
+
+// Create verification email token
+async function createVerifyEmailToken(user: User): Promise<string> {
+  const token = generateRandomToken('ve');
+
+  // Save token to Redis with the token as key and user.id as value
+  await redisUtils.saveToken(
+    token,
+    user.id,
+    EMAIL_VERIFICATION_TOKEN_EXPIRATION
+  );
+
+  return token;
+}
+
+// Create password reset token
+async function createPasswordResetToken(user: User): Promise<string> {
+  const token = generateRandomToken('pr');
+
+  await redisUtils.saveToken(token, user.id, PASSWORD_RESET_TOKEN_EXPIRATION);
+
+  return token;
+}
+
+// Check for maximum concurrent email verification requests
+async function getFirstExpirationTime(
+  prefix: string,
+  userId: string,
+  maxRequests: number
+): Promise<ExpirationInfo | undefined> {
+  // Get all keys matching 've_*:{userId}'
+  const keys = await redisUtils.keys(`${prefix}_*:${userId}`);
+
+  if (keys.length >= maxRequests) {
+    // Calculate the maximum wait time
+    const { waitTime, waitMinutes, waitHours } =
+      await redisUtils.waitTime(keys);
+
+    const asString =
+      waitHours === 0
+        ? `Too many requests. Try again in ${waitMinutes} minutes.`
+        : `Too many requests. Try again in ${waitHours} hour(s) and ${waitMinutes} minute(s).`;
+
+    return {
+      waitTime,
+      waitHours,
+      waitMinutes,
+      asString,
+    };
+  }
+
+  return undefined;
 }
