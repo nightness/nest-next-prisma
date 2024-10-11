@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export default function setupSwagger(app: NestExpressApplication) {
   // Swagger Setup
-  let builder = new DocumentBuilder()
+  const builder = new DocumentBuilder()
     .setTitle(process.env.SWAGGER_TITLE || 'API')
     .setDescription(process.env.SWAGGER_DESCRIPTION || 'API Documentation')
     .setVersion(process.env.SWAGGER_API_VERSION || '1.0')

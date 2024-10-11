@@ -12,7 +12,7 @@ export class AuthenticatedUserGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    if (!!DISABLE_AUTH) {
+    if (DISABLE_AUTH) {
       request.user = {
         email: 'nobody@noplace',
         name: 'nobody',

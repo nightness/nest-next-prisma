@@ -58,7 +58,7 @@ export class AuthController {
     @Body() registerDto: RegisterDto,
   ): Promise<{ access_token: string; refresh_token: string }> {
     // console.log('registerDto', registerDto);
-    if (!!DISABLE_REGISTRATION) {
+    if (DISABLE_REGISTRATION) {
       throw new ForbiddenException('New registrations are disabled');
     }
     return await this.authService.register(
