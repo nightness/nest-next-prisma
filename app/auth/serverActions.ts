@@ -36,13 +36,13 @@ function isStrongPassword(password: string): boolean {
 }
 
 // Find user by email
-export async function findUserByEmail(email: string): Promise<User | null> {
+async function findUserByEmail(email: string): Promise<User | null> {
   const user = await prisma.user.findUnique({ where: { email } });
   return user;
 }
 
 // Create verification email token
-export async function createVerifyEmailToken(user: User): Promise<string> {
+async function createVerifyEmailToken(user: User): Promise<string> {
   const token = generateRandomToken('ve');
 
   // Save token to Redis with the token as key and user.id as value
