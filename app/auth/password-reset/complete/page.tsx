@@ -6,15 +6,26 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 interface Props {
-  searchParams: { token?: string };
+  searchParams: { token?: string; error?: string };
 }
 
 export default async function PasswordResetCompletePage({ searchParams }: Props) {
   const token = searchParams.token;
-  let errorMessage = '';
+  const errorMessage = searchParams.error;
 
-  if (!token) {
-    errorMessage = 'Invalid or missing token.';
+  // If there's an error related to the token being invalid, display a message and a link to request a new reset
+  if (errorMessage === 'Invalid token' || !token) {
+    return (
+      <div className={styles['form-container']} style={{ textAlign: 'center', maxWidth: '500px' }}>
+        <h1 className={styles['form-title']}>Password Reset Failed</h1>
+        <p className={`${styles.message} ${styles.error}`}>
+          {errorMessage || 'Invalid or missing token'}
+        </p>
+        <Link href="/auth/password-reset" className={styles.button}>
+          Request New Password Reset
+        </Link>
+      </div>
+    );
   }
 
   async function handleSubmit(formData: FormData) {
@@ -23,33 +34,19 @@ export default async function PasswordResetCompletePage({ searchParams }: Props)
     const newPassword = formData.get('newPassword') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
 
-    // Validation is minimal since the server action will handle the logic
-    if (!token) {
-      throw new Error('Invalid or missing token.');
-    }
-
+    // Validate the passwords
     if (newPassword !== confirmPassword) {
-      throw new Error('Passwords do not match.');
+      redirect(`/auth/password-reset/complete?token=${token}&error=Passwords do not match.`);
+      return;
     }
 
     try {
-      await resetPassword(token, newPassword);
+      await resetPassword(token!, newPassword);
       redirect('/auth/password-reset/completed');
     } catch (error) {
-      throw new Error((error as Error)?.message || 'Unable to reset password.');
+      const errorMsg = (error as Error)?.message || 'Unable to reset password. Please try again.';
+      redirect(`/auth/password-reset/complete?token=${token}&error=${encodeURIComponent(errorMsg)}`);
     }
-  }
-
-  if (!token) {
-    return (
-      <div className={styles['form-container']} style={{ textAlign: 'center', maxWidth: '500px' }}>
-        <h1 className={styles['form-title']}>Password Reset Failed</h1>
-        <p className={`${styles.message} ${styles.error}`}>{errorMessage}</p>
-        <Link href="/auth/password-reset" className={styles.button}>
-          Try Again
-        </Link>        
-      </div>
-    );
   }
 
   return (
