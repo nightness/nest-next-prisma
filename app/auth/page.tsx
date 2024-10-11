@@ -28,6 +28,9 @@ export default function AuthIndexPage() {
         <Link href="/auth/change-password">
           <div className={styles.a}>Change Password</div>
         </Link>
+        <Link href="/auth/verify-email">
+          <div className={styles.a}>Verify E-Mail</div>
+        </Link>
       </div>
     </div>
   );

@@ -188,7 +188,6 @@ async function findUserByEmail(email: string): Promise<User | null> {
 async function createVerifyEmailToken(user: User): Promise<string> {
   const token = generateRandomToken('ve');
 
-  // Save token to Redis with the token as key and user.id as value
   await redisUtils.saveToken(
     token,
     user.id,
@@ -213,7 +212,7 @@ async function getFirstExpirationTime(
   userId: string,
   maxRequests: number
 ): Promise<ExpirationInfo | undefined> {
-  // Get all keys matching 've_*:{userId}'
+  // Get all keys matching pattern
   const keys = await redisUtils.keys(`${prefix}_*:${userId}`);
 
   if (keys.length >= maxRequests) {
