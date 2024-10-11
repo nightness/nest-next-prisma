@@ -8,21 +8,14 @@ import { User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
 import {
-  ACCESS_TOKEN_EXPIRATION, 
-  EMAIL_VERIFICATION_TOKEN_EXPIRATION, 
-  MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS, 
-  MAX_CONCURRENT_PASSWORD_RESET_REQUESTS, 
-  MAX_REFRESH_TOKENS, 
-  PASSWORD_RESET_TOKEN_EXPIRATION, 
-  REFRESH_TOKEN_EXPIRATION, 
-  SERVER_URL 
+  ACCESS_TOKEN_EXPIRATION,
+  MAX_REFRESH_TOKENS,
+  REFRESH_TOKEN_EXPIRATION,
 } from '../../config/config.env';
-import { PrismaService } from '../../modules/prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { EjsService } from '../../modules/ejs/ejs.service';
 import { EmailerService } from '../../modules/emailer/emailer.service';
 import { RedisService } from '../../modules/redis/redis.service';
-// import { User as ExpressUser } from '../../system/types';
 
 import { JwtPayload, LoginResponseDto } from './auth.types';
 
@@ -33,9 +26,8 @@ export class AuthService {
     private ejsService: EjsService, // Service for rendering HTML templates
     private redisService: RedisService, // Service for Redis operations
     private userService: UserService, // Service for user operations
-    private jwtService: JwtService, // NestJS JWT service for token operations
-    private prisma: PrismaService, // Add PrismaService for database access
-  ) { }
+    private jwtService: JwtService // NestJS JWT service for token operations
+  ) {}
 
   async refreshToken(refreshToken: string) {
     const user = await this.validateRefreshToken(refreshToken);
@@ -56,23 +48,13 @@ export class AuthService {
     return { user: payload, access_token };
   }
 
-  // Verifies the token used for render the page to reset password
-  async completePasswordResetRequest(token: string) {
-    // Get the user ID associated with the token
-    const userId = await this.redisService.get(token);
-    if (!userId) {
-      throw new BadRequestException('Invalid or expired token');
-    }
-
-    return { token, validationErrors: [] }; // Data passed to the view
-  }
-
   async deleteAccount(userId: string, password: string): Promise<boolean> {
     // Fetch the full user record so we have access to the password
     const user = await this.userService.findById(userId);
 
     // Verify the password provided by the user matches the one stored in the database
-    const isMatch = user && await this.comparePassword(password, user.password);
+    const isMatch =
+      user && (await this.comparePassword(password, user.password));
     if (!isMatch) {
       return false;
     }
@@ -86,146 +68,10 @@ export class AuthService {
     return true;
   }
 
-  // Initiates the password reset process
-  async sendVerificationEmail(email: string): Promise<void> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      return;
-    }
-
-    // User is limited to MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS requests per day to prevent abuse
-    const keys = await this.redisService.keys(`ve_*:${user.id}`);
-    if (keys.length > MAX_CONCURRENT_EMAIL_VERIFICATION_REQUESTS) {
-      // Look though the keys to determine how long the user has to wait before making another request
-      let waitTime = 0;
-      for (const key of keys) {
-        const ttl = await this.redisService.ttl(key);
-        if (ttl > waitTime) {
-          waitTime = ttl;
-        }
-      }
-
-      const waitHours = Math.floor(waitTime / 60 / 60);
-      const waitMinutes = Math.ceil((waitTime / 60) % 60);
-
-      if (waitHours === 0) {
-        throw new BadRequestException(
-          `Too many requests. Try again in ${waitMinutes} minutes`,
-        );
-      }
-
-      throw new BadRequestException(
-        `Too many requests. Try again in ${waitHours === 1 ? 'an hour' : `${waitHours} hours`
-        } hours and ${Math.ceil((waitTime / 60) % 60)} minutes`,
-      );
-    }
-
-    // Create a token for verifying the email and store it in Redis
-    const token = this.generateRandomToken('ve');
-
-    // Send the token to the user via email
-    const verificationLink = `${SERVER_URL}/auth/verify-email?token=${token}`;
-
-    // Use ejs to render the html that will form the body of the e-mail
-    const staticHtml = await this.ejsService.renderFileToString(
-      'verify-email/request.ejs',
-      {
-        name: user.name,
-        actionLink: verificationLink,
-        randomNumber: Math.random(),
-      },
-    );
-
-    // Save token to Redis
-    await this.redisService.saveToken(
-      token,
-      user.id,
-      EMAIL_VERIFICATION_TOKEN_EXPIRATION,
-    );
-
-    // Send e-mail to user
-    await this.emailerService.sendEmail(
-      email,
-      'E-Mail Verification',
-      staticHtml,
-    );
-  }
-
-  async verifyEmail(token: string) {
-    if (!token) {
-      throw new BadRequestException('Missing token');
-    }
-    if (!token.startsWith('ve_')) {
-      throw new BadRequestException('Invalid token');
-    }
-    const userId = await this.redisService.get(token);
-    if (!userId) {
-      throw new BadRequestException('Invalid or expired token');
-    }
-
-    await this.userService.update(userId, { isEmailVerified: true });
-
-    // Delete all "ve" tokens for this user
-    await this.redisService.deleteTokens('ve', userId);
-  }
-
-  async forgotPassword(email: string): Promise<void> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      // throw new BadRequestException('User not found');
-      return; // Don't reveal if the user exists
-    }
-
-    // User is limited to MAX_CONCURRENT_PASSWORD_RESET_REQUESTS requests per day to prevent abuse
-    const keys = await this.redisService.keys(`pr_*:${user.id}`);
-    if (keys.length > MAX_CONCURRENT_PASSWORD_RESET_REQUESTS) {
-      // Get the wait time until the next key of the provided keys expires
-      const { waitTime, waitMinutes, waitHours } =
-        await this.redisService.waitTime(keys);
-
-      if (waitHours === 0) {
-        throw new BadRequestException(
-          `Too many requests. Try again in ${waitMinutes} minutes.`,
-        );
-      }
-
-      throw new BadRequestException(
-        `Too many requests. Try again in ${waitHours === 1 ? 'an hour' : `${waitHours} hours`
-        } hours and ${Math.ceil((waitTime / 60) % 60)} minutes.`,
-      );
-    }
-
-    // Create a token for password resets
-    const token = this.generateRandomToken('pr');
-
-    // The link used to reset the password
-    const resetLink = `${SERVER_URL}/auth/password-reset?token=${token}`;
-
-    // Parse the ejs view that will form the email to the user
-    const staticHtml = await this.ejsService.renderFileToString(
-      'password-reset/request.ejs',
-      {
-        name: user.name,
-        actionLink: resetLink,
-        randomNumber: Math.random(),
-      },
-    );
-
-    // Save the token to redis
-    await this.redisService.saveToken(
-      token,
-      user.id,
-      PASSWORD_RESET_TOKEN_EXPIRATION,
-    );
-
-    // Send email to user
-    await this.emailerService.sendEmail(email, 'Password Reset', staticHtml);
-  }
-
   async changePassword(
     userId: string,
     currentPassword: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<LoginResponseDto> {
     const user = await this.userService.findById(userId);
 
@@ -243,6 +89,7 @@ export class AuthService {
     await this.userService.update(userId, { password: hashedNewPassword });
 
     // Delete all refresh tokens for the user
+    // NOTE: This will log out the user from all devices
     await this.redisService.deleteTokens('rt', userId);
 
     // Send an email to the user to notify them of the password change
@@ -251,12 +98,12 @@ export class AuthService {
       {
         name: user.name,
         randomNumber: Math.random(),
-      },
+      }
     );
     await this.emailerService.sendEmail(
       user.email,
       'Notification: Your password was recently changed',
-      staticHtml,
+      staticHtml
     );
 
     // Return new tokens
@@ -269,7 +116,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
       await this.redisService.deleteToken(refreshToken);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       throw new UnauthorizedException('Invalid refresh token: ', error.message);
     }
@@ -341,7 +188,7 @@ export class AuthService {
     await this.redisService.saveToken(
       refreshToken,
       user.id,
-      REFRESH_TOKEN_EXPIRATION,
+      REFRESH_TOKEN_EXPIRATION
     );
 
     return {
@@ -354,7 +201,7 @@ export class AuthService {
   async register(
     name: string,
     email: string,
-    password: string,
+    password: string
   ): Promise<LoginResponseDto> {
     // Check if user with the email already exists
     const userExists = await this.userService.findByEmail(email);
@@ -380,7 +227,7 @@ export class AuthService {
     const { length: count } = await this.redisService.keys(`rt_*:${user.id}`);
     if (count > MAX_REFRESH_TOKENS) {
       throw new UnauthorizedException(
-        'Too many logins. Try again later, reset your password, or logout from other devices.',
+        'Too many logins. Try again later, reset your password, or logout from other devices.'
       );
     }
 
@@ -394,7 +241,7 @@ export class AuthService {
 
   private async comparePassword(
     enteredPassword: string,
-    storedPasswordHash: string,
+    storedPasswordHash: string
   ): Promise<boolean> {
     return bcrypt.compare(enteredPassword, storedPasswordHash);
   }

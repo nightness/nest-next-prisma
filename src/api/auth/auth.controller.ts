@@ -1,14 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   ForbiddenException,
-  Get,
   HttpStatus,
   Post,
-  Query,
-  Render,
   Req,
   Res,
   UnauthorizedException,
@@ -17,7 +13,6 @@ import {
 import {
   ApiBody,
   ApiOperation,
-  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -206,94 +201,10 @@ export class AuthController {
       } else {
         response.status(HttpStatus.OK).json({ message: 'Account deleted successfully' });
       }
-    } catch (e) {
+    } catch {
       response
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ message: 'An error occurred while deleting the account' });
     }
-  }  
-
-  @Post('password-reset')
-  @ApiOperation({
-    summary: "POST method for updating a user's password from view",
-  })
-  @ApiResponse({ status: 204, description: 'Password reset' })
-  async completePasswordResetPost(
-    @Query('token') token: string,
-    @Req() req: Request,
-  ): Promise<void> {
-    if (!token) {
-      throw new BadRequestException('Invalid token');
-    }
-
-    // Check if the token is a password reset token
-    if (!token.startsWith('pr_')) {
-      throw new BadRequestException('Invalid token');
-    }
-
-    const { password, confirmPassword } = req.body ?? {};
-    if (!password || !confirmPassword) {
-      throw new BadRequestException('Invalid password');
-    }
-
-    if (password !== confirmPassword) {
-      throw new BadRequestException('Passwords do not match');
-    }
-
-    return this.authService.completePasswordResetPost(token, password);
-  }
-
-  @Post('forgot-password')
-  @ApiOperation({
-    summary:
-      'Sends an e-mail to the specified user so they can reset their password',
-  })
-  @ApiBody({
-    required: true,
-    description: 'User email',
-    schema: {
-      format: 'object',
-      properties: {
-        email: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({ status: 204, description: 'Password reset' })
-  async forgotPassword(@Body('email') email: string): Promise<void> {
-    return this.authService.forgotPassword(email);
-  }
-
-  @Get('verify-email')
-  @ApiOperation({ summary: 'Verify user email' })
-  @ApiQuery({
-    required: true,
-    name: 'token',
-    type: 'string',
-    description: 'Verification token',
-  })
-  @ApiResponse({ status: 204, description: 'Email verified' })
-  @Render('verify-email/completed')
-  async verifyEmail(@Query('token') token: string): Promise<void> {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('send-verification-email')
-  @ApiOperation({ summary: 'Send verification email' })
-  @ApiBody({
-    required: true,
-    description: 'User email',
-    schema: {
-      format: 'object',
-      properties: {
-        email: { type: 'string' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'If the e-mail is valid, they were sent a verification email',
-  })
-  async sendVerificationEmail(@Body('email') email: string): Promise<void> {
-    this.authService.sendVerificationEmail(email);
-  }
+  } 
 }
