@@ -156,7 +156,7 @@ export async function verifyEmail(token: string): Promise<void> {
 }
 
 // Create password reset token
-export async function createPasswordResetToken(user: User): Promise<string> {
+async function createPasswordResetToken(user: User): Promise<string> {
   const token = generateRandomToken('pr');
 
   await redisUtils.saveToken(token, user.id, PASSWORD_RESET_TOKEN_EXPIRATION);

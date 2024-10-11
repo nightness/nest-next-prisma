@@ -4,7 +4,7 @@
 import { getExpirationTime } from "@/utils/jwt";
 import { serverFetch } from "@/utils/serverFetch";
 import { User } from "@prisma/client";
-import React, { createContext, use } from "react";
+import React, { createContext } from "react";
 import { useEffect, useState } from 'react';
 
 // Define the type for the AuthContext value
@@ -90,8 +90,8 @@ async function initializeCurrentUser() {
     } else {
       console.error('Failed to get current user: ', error?.message || status);
     }
-  } catch (error: any) {
-    console.error('Failed to get current user: ', error?.message || 'Unknown error');
+  } catch (error) {
+    console.error('Failed to get current user: ', (error as Error)?.message || 'Unknown error');
   }
 }
 
@@ -107,7 +107,7 @@ export function isLoggedIn(): boolean {
 export async function login(email: string, password: string): Promise<void> {
   try {
     // Fetch the access token and refresh token
-    const [status, data] = await serverFetch<AuthenticationResponse>('/api/auth/login', {
+    const [, data] = await serverFetch<AuthenticationResponse>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -116,14 +116,14 @@ export async function login(email: string, password: string): Promise<void> {
     await setTokens(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
-    const [meStatus, user] = await serverFetch<User>('/api/user/me', {
+    const [, user] = await serverFetch<User>('/api/user/me', {
       sendAccessToken: true,
     });
 
     // Set the current user variable
     setCurrentUser(user);
-  } catch (err: any) {
-    throw new Error(err?.message || 'Unable to sign in.');
+  } catch (err) {
+    throw new Error((err as Error)?.message || 'Unable to sign in.');
   }
 }
 
@@ -147,7 +147,7 @@ export async function signOut() {
         },
         body: JSON.stringify({ refreshToken: currentRefreshToken }),
       });
-    } catch (error) {
+    } catch {
       throw new Error('Failed to sign out');
     } finally {
       // Clear the refresh token from local storage
@@ -165,7 +165,7 @@ export async function signOut() {
 export async function signUp(email: string, password: string, name: string): Promise<void> {
   try {
     // Fetch the access token and refresh token
-    const [status, data] = await serverFetch<{
+    const [, data] = await serverFetch<{
       access_token: string;
       refresh_token: string;
     }>('/api/auth/register', {
@@ -177,25 +177,14 @@ export async function signUp(email: string, password: string, name: string): Pro
     await setTokens(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
-    const [meStatus, user] = await serverFetch<User>('/api/user/me', {
+    const [, user] = await serverFetch<User>('/api/user/me', {
       sendAccessToken: true,
     });
 
     // Set the current user variable
     setCurrentUser(user);
-  } catch (err: any) {
-    throw new Error(err?.message || 'Unable to sign up.');
-  }
-}
-
-export async function forgotPassword(email: string): Promise<void> {
-  try {
-    await serverFetch('/api/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-  } catch (err: any) {
-    throw new Error(err?.message || 'Unable to send password reset email.');
+  } catch (err) {
+    throw new Error((err as Error)?.message || 'Unable to sign up.');
   }
 }
 
@@ -283,7 +272,7 @@ async function setTokens(accessToken: string, refreshToken?: string) {
 
 async function refreshAccessToken(): Promise<string> {
   // Make the API request to refresh the access token
-  const [status, data] = await serverFetch<RefreshResponse>('/api/auth/refresh', {
+  const [, data] = await serverFetch<RefreshResponse>('/api/auth/refresh', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

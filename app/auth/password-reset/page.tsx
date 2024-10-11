@@ -4,8 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import styles from '../(styles)/auth.module.css';
-
-import { forgotPassword } from '../provider';
+import { sendPasswordResetEmail } from '../serverActions';
 
 export default function PasswordReset() {
   const [email, setEmail] = useState('');
@@ -14,10 +13,10 @@ export default function PasswordReset() {
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await forgotPassword(email);
+      await sendPasswordResetEmail(email);
       setMessage('Password reset email sent.');
-    } catch (err: any) {
-      setMessage(err.message || 'Unable to send password reset email.');
+    } catch (err) {
+      setMessage((err as Error)?.message || 'Unable to send password reset email.');
     }
   };
 
