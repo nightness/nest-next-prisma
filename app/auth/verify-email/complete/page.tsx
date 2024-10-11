@@ -1,4 +1,4 @@
-// auth/verify-email/completed/page.tsx
+// auth/verify-email/complete/page.tsx
 import styles from '../../(styles)/auth.module.css';
 import Link from 'next/link';
 
