@@ -25,6 +25,11 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
           height={150}
         />
       </div>
+      <div className={styles['button-container']}>
+        <button onClick={() => reset()} className={utilStyles.button}>
+          Try Again
+        </button>
+      </div>
       <div className={styles['link-container']}>
         <Link href="/" className={utilStyles.button}>
           Go Home
