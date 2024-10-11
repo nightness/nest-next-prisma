@@ -1,0 +1,16 @@
+{
+  "name": "Full Stack PWA Dev Container",
+  "dockerComposeFile": "../docker-compose.dev.yml",
+  "service": "app",
+  "workspaceFolder": "/usr/src/app",
+  "shutdownAction": "stopCompose",
+  "extensions": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-azuretools.vscode-docker"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/sh",
+    "editor.formatOnSave": true
+  }
+}
