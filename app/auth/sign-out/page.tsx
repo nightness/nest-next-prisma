@@ -12,8 +12,8 @@ export default function SignOutPage() {
     try {
       await signOut();
       router.push('/');
-    } catch (error: any) {
-      console.error(error.message);
+    } catch (error) {
+      console.error((error as Error)?.message || 'An error occurred during sign out.');
     }
   }
 
