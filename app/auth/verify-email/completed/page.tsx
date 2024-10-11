@@ -2,7 +2,17 @@
 import styles from '../../(styles)/auth.module.css';
 import Link from 'next/link';
 
-export default function VerifyEmailCompletedPage() {
+interface Props {
+  searchParams: { token?: string };
+}
+
+export default async function VerifyEmailPage({ searchParams }: Props) {
+  const token = searchParams.token;
+
+  if (!token) {
+    throw new Error('Invalid or missing token.');
+  }
+
   return (
     <div className={styles['form-container']} style={{ textAlign: 'center', maxWidth: '500px' }}>
       <h1 className={styles['form-title']}>Email Verified!</h1>

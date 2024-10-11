@@ -97,6 +97,12 @@ export async function sendVerificationEmail(email: string): Promise<void> {
     // We do not want to reveal if the email is not registered
     return;
   }
+  if (user.isEmailVerified) {
+    // throw new Error('Email is already verified.');
+    // Don't throw an error here
+    // We do not want to reveal if the email is registered
+    return;
+  }
 
   // Check request limits before creating a token
   const expiration = await getFirstExpirationTime(
@@ -110,7 +116,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
 
   // Create a token for verifying the email
   const token = await createVerifyEmailToken(user);
-  const verificationLink = `${SERVER_URL}/auth/verify-email?token=${token}`;
+  const verificationLink = `${SERVER_URL}/auth/verify-email/complete?token=${token}`;
 
   // TODO: Implement email sending functionality
   if (process.env.NODE_ENV !== 'production') {
@@ -124,7 +130,7 @@ export async function sendVerificationEmail(email: string): Promise<void> {
   //   randomNumber: Math.random(),
   // });
 
-  // Send email to user
+  // TODO: Send email to user
   // await sendEmail(email, 'E-Mail Verification', staticHtml);
 }
 
