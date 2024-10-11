@@ -2,7 +2,6 @@
 // app/auth/page.tsx
 
 import Link from 'next/link';
-import stylesApp from '../(styles)/app.module.css';
 import styles from '../auth/(styles)/auth.module.css';
 
 import { useCurrentUser } from './provider';

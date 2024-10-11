@@ -23,8 +23,8 @@ export default function ChangePassword() {
     try {
       await changePassword(currentPassword, newPassword);
       setMessage('Password successfully changed.');
-    } catch (err: any) {
-      setMessage(err.message || 'Unable to change password.');
+    } catch (err) {
+      setMessage((err as Error)?.message || 'Unable to change password.');
     }
   };
 

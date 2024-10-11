@@ -15,7 +15,7 @@ export class EjsService {
   public async sendView(
     res: Response,
     relativePath: string,
-    data: any = {},
+    data: Record<string, any> = {},
     status: HttpStatus = HttpStatus.OK,
   ): Promise<Response> {
     const html = await this.renderFileToString(relativePath, data);
