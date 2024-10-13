@@ -1,6 +1,6 @@
 // src/app.module.ts
 import { join } from 'path';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Algorithm } from 'jsonwebtoken';
@@ -49,6 +49,16 @@ import { UserModule } from './api/user/user.module';
   providers: [JwtService],
 })
 export class AppModule {
+  private readonly logger = new Logger(AppModule.name);
+
+  // Add an uncaught exception handler
+  constructor() {
+    process.on('uncaughtException', (error) => {
+      this.logger.error(`Uncaught Exception: ${error.message}`);
+      process.exit(1);
+    });
+  }
+
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes('*');
   }
