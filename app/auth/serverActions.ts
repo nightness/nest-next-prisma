@@ -148,7 +148,7 @@ export async function sendPasswordResetEmail(email: string): Promise<void> {
 
   // Create a token for resetting the password
   const token = await createPasswordResetToken(user);
-  const resetLink = `${SERVER_URL}/auth/reset-password?token=${token}`;
+  const resetLink = `${SERVER_URL}/auth/password-reset?token=${token}`;
 
   // TODO: Implement email sending functionality
   if (process.env.NODE_ENV !== 'production') {
