@@ -1,30 +1,70 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { createLogger, format, transports } from 'winston';
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const isDev = NODE_ENV !== 'production';
+
+// Create a logger
+const logger = createLogger({
+  // level: 'info',
+  format: format.combine(format.cli(), format.timestamp()),
+  transports: [
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.cli(),
+        format.timestamp()
+      ),
+    }),
+  ],
+});
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // See if 'admin@localhost' user already exists
-  const adminUser = await prisma.user.findUnique({
-    where: { email: 'admin@localhost' },
+  // Log the environment
+  logger.log({
+    level: 'info',
+    message: `Environment: ${NODE_ENV}`,
   });
 
-  if (adminUser) {
-    console.log('Admin user already exists:', adminUser);
-    return;
+  // Any initialization code goes here
+  // ...
+
+  // For development, seed the database with an admin user
+  if (isDev) {
+    // See if 'admin@localhost' user already exists
+    const adminUser = await prisma.user.findUnique({
+      where: { email: 'admin@localhost' },
+    });
+
+    // If the user already exists, log it and return
+    if (adminUser) {
+      logger.log({
+        level: 'info',
+        message: 'Admin user already exists',
+      });
+      return;
+    }
+
+    // Seed users
+    const user = await createUser({
+      email: 'admin@localhost',
+      name: 'Admin',
+      password: 'admin',
+      isActive: true,
+      isAdmin: true,
+      isEmailVerified: true,
+    });
+
+    // Log the created user
+    logger.log({
+      level: 'info',
+      message: 'Created admin user with email: admin@localhost',
+      user,
+    });
   }
-
-  // Seed users
-  const user = await createUser({
-    email: 'admin@localhost',
-    name: 'Admin',
-    password: 'admin',
-    isActive: true,
-    isAdmin: true,
-    isEmailVerified: true,
-  });
-
-  console.log('Created user:', user);
 }
 
 main()
@@ -68,11 +108,3 @@ async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
   return bcrypt.hash(password, saltRounds);
 }
-
-
-// async function comparePassword(
-//   enteredPassword: string,
-//   storedPasswordHash: string,
-// ): Promise<boolean> {
-//   return bcrypt.compare(enteredPassword, storedPasswordHash);
-// }

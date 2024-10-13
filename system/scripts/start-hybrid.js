@@ -29,6 +29,21 @@ const { spawn } = require('child_process');
 const kill = require('tree-kill');
 const readline = require('readline');
 
+const { createLogger, format, transports } = require('winston');
+
+// Create a logger
+const logger = createLogger({
+  format: format.cli(),
+  transports: [
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        format.cli()
+      ),
+    }),
+  ],
+});
+
 // Array to store all running processes
 let processes = [];
 
@@ -60,7 +75,10 @@ if (supportsRawMode) {
   process.stdin.on('keypress', async (str, key) => {
     if (key.name === 'r') {
       // Reload
-      console.log('Reloading...');
+      logger.log({
+        level: 'info',
+        message: 'Reloading app...',
+      });
 
       // Kill all running processes
       await stopAllProcesses();
@@ -69,7 +87,6 @@ if (supportsRawMode) {
       startApp();
     }
     if (key.ctrl && key.name === 'c') {
-      // console.log('Ctrl+C was pressed, but it is disabled.');
       shutdown();
     }
   });
@@ -106,28 +123,46 @@ const watcher = (function () {
     if (path === 'prisma/schema.prisma') {
       // npx prisma generate
       try {
-        console.log(
-          'Prisma schema has been changed. Regenerating Prisma client...'
-        );
+        logger.log({
+          level: 'info',
+          message: 'Prisma schema has been changed. Generating Prisma client...',
+        });
         await spawnProcess('npx', ['prisma', 'generate']);
       } catch (error) {
-        console.error('Error generating Prisma client:', error.message);
+        logger.error({
+          level: 'error',
+          message: 'Error generating Prisma client: {error}',
+          error,
+        });
       }
 
       // npx prisma db push
       try {
-        console.log(
-          'Prisma schema has been changed. Pushing changes to the database...'
+        logger.info({
+          level: 'info',
+          message: 'Pushing changes to the database...',
+        }
+          
         );
         await spawnProcess('npx', ['prisma', 'db', 'push', '--force-reset']);
       } catch (error) {
-        console.error('Error pushing changes to the database:', error.message);
+        logger.error({
+          level: 'error',
+          message: 'Error pushing changes to the database: {error}',
+          error,
+        });
       }
 
       // Restart the app
-      console.log(`Restarting app...`);
+      logger.info({
+        level: 'info',
+        message: 'Restarting app...',
+      });
     } else {
-      console.log(`'${path}' has been changed. Restarting app...`);
+      logger.info({
+        level: 'info',
+        message: `'${path}' has been changed. Restarting app...`,        
+      });
     }
 
     // Kill all running processes
@@ -137,12 +172,20 @@ const watcher = (function () {
     startApp();
   });
 
-  watcher.on('error', (error) => console.error(`Watcher error: ${error}`));
+  watcher.on('error', (error) => logger.error({
+    level: 'error',
+    message: 'Error watching files: {error}',
+    error,
+  }));
 
   return watcher;
 })();
 
 async function startApp() {
+  logger.info({
+    level: 'info',
+    message: 'Starting app...',
+  });
   try {
     if (process.env.NODE_ENV === 'production') {
       return trackPromise(startProduction());
@@ -150,7 +193,11 @@ async function startApp() {
       return trackPromise(startDev());
     }
   } catch (error) {
-    console.error('Error starting app:', error.message);
+    logger.error({
+      level: 'error',
+      message: 'Error starting app: {error}',
+      error,
+    });
   }
 }
 
@@ -161,7 +208,11 @@ async function startDev() {
     await seedPrisma();
     await startServer();
   } catch (error) {
-    console.error('Error during app execution:', error.message);
+    logger.error({
+      level: 'error',
+      message: 'Error during app execution: {error}',
+      error,
+    });
   }
 }
 
@@ -170,12 +221,19 @@ async function startProduction() {
   try {
     const { code } = await startServer();
     if (code !== 0) {
-      console.error(`Process exited with code ${code}. Restarting...`);
+      logger.error({
+        level: 'error',
+        message: `Process exited with code ${code}. Restarting...`,
+      });
       await sleep(1000); // Wait a bit before restarting
       startApp(); // Restart the server
     }
   } catch (error) {
-    console.error('Error during app execution:', error.message);
+    logger.error({
+      level: 'error',
+      message: 'Error during app execution: {error}',
+      error,
+    });
   }
 }
 
@@ -189,7 +247,10 @@ const shutdown = (() => {
       return;
     }
     shuttingDown = true;
-    console.log('\nShutting down...');
+    logger.info({
+      level: 'info',
+      message: 'Shutting down...',
+    });
 
     if (supportsRawMode) {
       // Done with the raw mode
@@ -208,10 +269,11 @@ const shutdown = (() => {
 
     // Check if all processes have been killed
     if (processes.length > 0) {
-      console.warn(
-        'Unable to kill the following processes:',
-        processes.map((proc) => proc.pid).join(', ')
-      );
+      logger.warn({
+        level: 'warn',
+        message: 'Unable to kill the following processes: {pids}',
+        pids: processes.map((proc) => proc.pid).join(', ')
+      });
     }
 
     // Exit the process
@@ -227,11 +289,18 @@ process.on('SIGINT', async () => {
 
 (async function main() {
   // Start the app
-  console.log(watch ? 'Watching for file changes...' : 'Starting app...');
+  logger.log({
+    level: 'info',
+    message: watch ? 'Watching for file changes...' : 'Starting app...',
+  });
   try {
     await trackPromise(startApp());
   } catch (error) {
-    console.error('Error starting app:', error.message);
+    logger.error({
+      level: 'error',
+      message: 'Error starting app: {error}',
+      error,
+    });
   }
 })();
 process.stdin.resume(); // Keep the process alive
@@ -293,10 +362,11 @@ async function stopAllProcesses(signals = ['SIGINT', 'SIGTERM', 'SIGKILL']) {
 
   // Warn if there are still processes running and there are no more signals to try
   if (processes.length > 0 && signals.length === 0) {
-    console.warn(
-      'Unable to kill the following processes:',
-      processes.map((proc) => proc.pid).join(', ')
-    );
+    logger.warn({
+      level: 'warn',
+      message: 'Unable to kill the following processes: {pids}',
+      pids: processes.map((proc) => proc.pid).join(', ')
+    });
   }
 
   // Clear out old processes (hopeful was empty anyways, but move on if not)
@@ -321,10 +391,12 @@ async function signalAllProcesses(signal) {
         new Promise((resolve) => {
           kill(childProcess.pid, signal, (err) => {
             if (err) {
-              console.error(
-                `Error force killing process ${childProcess.pid}:`,
-                err
-              );
+              logger.error({
+                level: 'error',
+                message: 'Error force killing process {pid}: {err}',
+                pid: childProcess.pid,
+                err,
+              });
             }
             resolve(true);
           });
