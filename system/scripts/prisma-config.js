@@ -1,23 +1,35 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 const { Command } = require('commander');
 const inquirer = require('inquirer').default || require('inquirer');
 const fs = require('fs');
-const child_process = require('child_process');
 const path = require('path');
+const child_process = require('child_process');
+const yaml = require('js-yaml'); // Add this line to require js-yaml
 
 const program = new Command();
 
 // List of supported providers
-const supportedProviders = ['postgresql', 'mysql', 'sqlite', 'sqlserver', 'mongodb', 'cockroachdb'];
+const supportedProviders = [
+  'postgresql',
+  'mysql',
+  'sqlite',
+  'sqlserver',
+  'mongodb',
+  'cockroachdb',
+];
 
 program
-  .requiredOption('--provider <type>', 'Specify the database provider')
+  .option('--provider <type>', 'Specify the database provider')
   .option('--defaults', 'Use default settings (non-interactive)')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Available providers:
   ${supportedProviders.join('\n  ')}
-`);
+`
+  );
 
 program.parse(process.argv);
 
@@ -26,115 +38,238 @@ const options = program.opts();
 // List of .env files to update
 const envFiles = ['.env', '.env.docker', '.env.docker.dev'];
 
+/**
+ * Generates the DATABASE_URL based on the provider and connection details.
+ * @param {string} provider - The database provider.
+ * @param {object} dbAnswers - The database connection details.
+ * @returns {string} - The DATABASE_URL string.
+ */
+function generateDatabaseUrl(provider, dbAnswers) {
+  switch (provider) {
+    case 'postgresql':
+      return `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+    case 'mysql':
+      return `mysql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+    case 'sqlite':
+      return `file:./${dbAnswers.database}.db`;
+    case 'sqlserver':
+      return `sqlserver://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address};database=${dbAnswers.database}`;
+    case 'mongodb':
+      return `mongodb://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+    case 'cockroachdb':
+      return `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}?sslmode=disable`;
+    default:
+      throw new Error(`Unsupported provider: ${provider}`);
+  }
+}
+
+/**
+ * Database service configurations for docker-compose files.
+ */
+const dbServices = {
+  postgresql: {
+    serviceName: 'postgres',
+    image: 'postgres:13',
+    environment: {
+      POSTGRES_USER: 'user',
+      POSTGRES_PASSWORD: 'password',
+      POSTGRES_DB: 'mydb',
+    },
+    ports: ['5432:5432'],
+    volumes: ['postgres-data:/var/lib/postgresql/data'],
+  },
+  mysql: {
+    serviceName: 'mysql',
+    image: 'mysql:8.0',
+    environment: {
+      MYSQL_ROOT_PASSWORD: 'root',
+      MYSQL_DATABASE: 'mydb',
+      MYSQL_USER: 'user',
+      MYSQL_PASSWORD: 'password',
+    },
+    ports: ['3306:3306'],
+    volumes: ['mysql-data:/var/lib/mysql'],
+  },
+  sqlite: {
+    // SQLite is file-based, so no service needed
+    serviceName: null,
+  },
+  sqlserver: {
+    serviceName: 'mssql',
+    image: 'mcr.microsoft.com/mssql/server:2019-latest',
+    environment: {
+      ACCEPT_EULA: 'Y',
+      SA_PASSWORD: 'yourStrong(!)Password',
+      MSSQL_PID: 'Express',
+    },
+    ports: ['1433:1433'],
+    volumes: ['mssql-data:/var/opt/mssql'],
+  },
+  mongodb: {
+    serviceName: 'mongo',
+    image: 'mongo:latest',
+    environment: {
+      MONGO_INITDB_ROOT_USERNAME: 'user',
+      MONGO_INITDB_ROOT_PASSWORD: 'password',
+      MONGO_INITDB_DATABASE: 'mydb',
+    },
+    ports: ['27017:27017'],
+    volumes: ['mongo-data:/data/db'],
+  },
+  cockroachdb: {
+    serviceName: 'cockroachdb',
+    image: 'cockroachdb/cockroach:v21.1.6',
+    command: 'start-single-node --insecure',
+    ports: ['26257:26257'],
+    volumes: ['cockroach-data:/cockroach/cockroach-data'],
+  },
+};
+
 async function main() {
   let provider = options.provider;
-  if (!supportedProviders.includes(provider)) {
+
+  // Validate provider if specified
+  if (provider && !supportedProviders.includes(provider)) {
     console.error(`Unsupported provider: ${provider}`);
     console.error(`Supported providers are: ${supportedProviders.join(', ')}`);
     process.exit(1);
   }
 
-  let databaseUrl = '';
+  let dbAnswers = {};
 
-  if (!options.defaults) {
-    // Interactive mode
-    const providerAnswer = await inquirer.prompt([
-      {
-        type: 'list',
-        name: 'provider',
-        message: 'Select a database provider',
-        choices: supportedProviders,
-        default: provider,
-      },
-    ]);
+  if (options.defaults) {
+    // Non-interactive mode: Use default settings
+    if (!provider) {
+      provider = 'postgresql'; // Default provider
+    }
 
-    provider = providerAnswer.provider;
+    dbAnswers = {
+      user: 'user',
+      password: 'password',
+      database: 'mydb',
+    };
 
-    // Ask for database connection details
-    const dbQuestions = [
-      {
-        type: 'input',
-        name: 'address',
-        message: 'Database Address (e.g., localhost:5432)',
-        default: 'localhost',
-      },
-      {
-        type: 'input',
-        name: 'user',
-        message: 'Database User',
-        default: 'user',
-      },
-      {
-        type: 'password',
-        name: 'password',
-        message: 'Database Password',
-        mask: '*',
-      },
-      {
-        type: 'input',
-        name: 'database',
-        message: 'Database Name',
-        default: 'mydb',
-      },
-    ];
-
-    const dbAnswers = await inquirer.prompt(dbQuestions);
-
-    // FIXME: Move the switch statement to a reusable function to remove code duplication
-
-    // Compose the DATABASE_URL
     switch (provider) {
       case 'postgresql':
-        databaseUrl = `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+        dbAnswers.address = 'localhost:5432';
         break;
       case 'mysql':
-        databaseUrl = `mysql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+        dbAnswers.address = 'localhost:3306';
         break;
       case 'sqlite':
-        databaseUrl = `file:./${dbAnswers.database}.db`;
+        // SQLite doesn't require address, user, or password
         break;
       case 'sqlserver':
-        databaseUrl = `sqlserver://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address};database=${dbAnswers.database}`;
+        dbAnswers.address = 'localhost:1433';
         break;
       case 'mongodb':
-        databaseUrl = `mongodb://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
+        dbAnswers.address = 'localhost:27017';
         break;
       case 'cockroachdb':
-        databaseUrl = `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}?sslmode=verify-full`;
+        dbAnswers.address = 'localhost:26257';
         break;
       default:
         console.error(`Unsupported provider: ${provider}`);
         process.exit(1);
     }
+
+    console.log(`Using default settings for provider: ${provider}`);
   } else {
-    // Non-interactive mode: Set default DATABASE_URL based on provider
-    // FIXME: USE THE DEFAULT
-    switch (provider) {
-      case 'postgresql':
-        databaseUrl = 'postgresql://user:password@localhost:5432/mydb';
-        break;
-      case 'mysql':
-        databaseUrl = 'mysql://user:password@localhost:3306/mydb';
-        break;
-      case 'sqlite':
-        databaseUrl = 'file:./dev.db';
-        break;
-      case 'sqlserver':
-        databaseUrl = 'sqlserver://user:password@localhost:1433;database=mydb';
-        break;
-      case 'mongodb':
-        databaseUrl = 'mongodb://user:password@localhost:27017/mydb';
-        break;
-      case 'cockroachdb':
-        databaseUrl = 'postgresql://user:password@localhost:26257/mydb?sslmode=verify-full';
-        break;
-      default:
-        console.error(`Unsupported provider: ${provider}`);
-        process.exit(1);
+    // Interactive mode
+    if (!provider) {
+      // Prompt for provider if not specified
+      const providerAnswer = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'provider',
+          message: 'Select a database provider',
+          choices: supportedProviders,
+        },
+      ]);
+      provider = providerAnswer.provider;
     }
-    console.log(`Using default DATABASE_URL for provider: ${provider}`);
+
+    // Ask for database connection details based on provider
+    let dbQuestions = [];
+
+    if (provider === 'sqlite') {
+      dbQuestions = [
+        {
+          type: 'input',
+          name: 'database',
+          message: 'Database file name',
+          default: 'dev',
+        },
+      ];
+    } else {
+      dbQuestions = [
+        {
+          type: 'input',
+          name: 'address',
+          message: 'Database Address (e.g., localhost:5432)',
+          default:
+            provider === 'mysql'
+              ? 'localhost:3306'
+              : provider === 'postgresql'
+              ? 'localhost:5432'
+              : provider === 'sqlserver'
+              ? 'localhost:1433'
+              : provider === 'mongodb'
+              ? 'localhost:27017'
+              : provider === 'cockroachdb'
+              ? 'localhost:26257'
+              : 'localhost',
+        },
+        {
+          type: 'input',
+          name: 'user',
+          message: 'Database User',
+          default: 'user',
+        },
+        {
+          type: 'password',
+          name: 'password',
+          message: 'Database Password',
+          mask: '*',
+        },
+        {
+          type: 'input',
+          name: 'database',
+          message: 'Database Name',
+          default: 'mydb',
+        },
+      ];
+    }
+
+    dbAnswers = await inquirer.prompt(dbQuestions);
   }
 
+  // Generate the DATABASE_URL
+  let databaseUrl;
+  try {
+    databaseUrl = generateDatabaseUrl(provider, dbAnswers);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+
+  // Update the .env files
+  updateEnvFiles(databaseUrl);
+
+  // Update Prisma schema file
+  updatePrismaSchema(provider);
+
+  // Update docker-compose files
+  updateDockerComposeFiles(provider);
+
+  console.log('Database provider has been switched successfully!');
+}
+
+/**
+ * Updates the .env files with the DATABASE_URL.
+ * @param {string} databaseUrl - The DATABASE_URL string.
+ */
+function updateEnvFiles(databaseUrl) {
   // Update the .env files
   for (const envFileName of envFiles) {
     const envFilePath = path.resolve(process.cwd(), envFileName);
@@ -164,7 +299,13 @@ async function main() {
       console.log(`Created ${envFileName} with DATABASE_URL`);
     }
   }
+}
 
+/**
+ * Updates the Prisma schema file with the database provider.
+ * @param {string} provider - The database provider.
+ */
+function updatePrismaSchema(provider) {
   // Update the schema.prisma file
   const schemaFilePath = path.resolve(process.cwd(), 'prisma', 'schema.prisma');
   if (!fs.existsSync(schemaFilePath)) {
@@ -187,7 +328,10 @@ async function main() {
 
   // Regex to find provider in datasource block
   const providerRegex = /provider\s*=\s*".*?"/;
-  datasourceBlock = datasourceBlock.replace(providerRegex, `provider = "${provider}"`);
+  datasourceBlock = datasourceBlock.replace(
+    providerRegex,
+    `provider = "${provider}"`
+  );
 
   // Replace the old datasource block with the updated one
   schemaContent = schemaContent.replace(datasourceRegex, datasourceBlock);
@@ -200,9 +344,83 @@ async function main() {
   try {
     child_process.execSync('npx prisma validate', { stdio: 'inherit' });
   } catch (error) {
-    console.error(`Prisma validation failed.`);
+    console.error(`Prisma validation failed.`, error?.message);
     process.exit(1);
   }
 }
 
-main();
+/**
+ * Updates the docker-compose files with the database service.
+ * @param {string} provider - The database provider.
+ */
+function updateDockerComposeFiles(provider) {
+  // Update docker-compose files
+  const dockerComposeFiles = ['docker-compose.yml', 'docker-compose.dev.yml'];
+
+  for (const composeFileName of dockerComposeFiles) {
+    const composeFilePath = path.resolve(process.cwd(), composeFileName);
+    if (fs.existsSync(composeFilePath)) {
+      console.log(`Updating ${composeFileName}...`);
+      const composeContent = fs.readFileSync(composeFilePath, 'utf8');
+      let composeYAML;
+      try {
+        composeYAML = yaml.load(composeContent);
+      } catch (e) {
+        console.error(`Failed to parse ${composeFileName}:`, e.message);
+        continue;
+      }
+
+      // Remove existing database services
+      const existingDbServices = [
+        'mysql',
+        'postgres',
+        'mssql',
+        'mongo',
+        'cockroachdb',
+      ];
+      for (const serviceName of existingDbServices) {
+        if (composeYAML.services && composeYAML.services[serviceName]) {
+          delete composeYAML.services[serviceName];
+        }
+      }
+
+      // Add the selected database service if applicable
+      const dbServiceConfig = dbServices[provider];
+      if (dbServiceConfig && dbServiceConfig.serviceName) {
+        composeYAML.services[dbServiceConfig.serviceName] = {
+          image: dbServiceConfig.image,
+          environment: dbServiceConfig.environment,
+          ports: dbServiceConfig.ports,
+          volumes: dbServiceConfig.volumes,
+          networks: ['app-net'],
+        };
+        if (dbServiceConfig.command) {
+          composeYAML.services[dbServiceConfig.serviceName].command =
+            dbServiceConfig.command;
+        }
+
+        // Update volumes
+        composeYAML.volumes = composeYAML.volumes || {};
+        for (const volume of dbServiceConfig.volumes) {
+          const volumeName = volume.split(':')[0];
+          if (!composeYAML.volumes[volumeName]) {
+            composeYAML.volumes[volumeName] = null;
+          }
+        }
+      }
+
+      // Write the updated compose file
+      const newComposeContent = yaml.dump(composeYAML, { noRefs: true });
+      fs.writeFileSync(composeFilePath, newComposeContent, 'utf8');
+      console.log(
+        `Updated ${composeFileName} with ${provider} database service.`
+      );
+    } else {
+      console.warn(`File ${composeFileName} not found.`);
+    }
+  }
+}
+
+main().catch((error) => {
+  console.error('An error occurred:', error);
+});
