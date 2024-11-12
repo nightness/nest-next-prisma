@@ -29,25 +29,44 @@ export class AuthService {
     private jwtService: JwtService // NestJS JWT service for token operations
   ) {}
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
+    // Step 1: Validate the refresh token and retrieve the user
     const user = await this.validateRefreshToken(refreshToken);
     if (!user) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-
+  
+    // Step 2: Delete the old refresh token to prevent reuse
+    await this.deleteRefreshToken(refreshToken);
+  
+    // Step 3: Generate a new access token
     const payload: JwtPayload = {
       email: user.email,
       name: user.name || '',
       sub: user.id,
       iat: Date.now(),
-      exp: Date.now() + 1000 * 60 * 60, // 1 hour
+      exp: Date.now() + ACCESS_TOKEN_EXPIRATION * 1000, // Use configured expiration
     };
-    const access_token = this.jwtService.sign(payload, {
+    const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
     });
-    return { user: payload, access_token };
+  
+    // Step 4: Generate a new refresh token and save it in Redis
+    const newRefreshToken = this.generateRandomToken('rt');
+    await this.redisService.saveToken(
+      newRefreshToken,
+      user.id,
+      REFRESH_TOKEN_EXPIRATION
+    );
+  
+    // Step 5: Return both tokens in the response
+    return {
+      user: payload,
+      access_token: accessToken,
+      refresh_token: newRefreshToken,
+    };
   }
-
+  
   async deleteAccount(userId: string, password: string): Promise<boolean> {
     // Fetch the full user record so we have access to the password
     const user = await this.userService.findById(userId);

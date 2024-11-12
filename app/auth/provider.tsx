@@ -1,10 +1,10 @@
 // app/auth/provider.tsx
-"use client";
+'use client';
 
-import { getExpirationTime } from "@/utils/jwt";
-import { serverFetch } from "@/utils/serverFetch";
-import { User } from "@prisma/client";
-import React, { createContext } from "react";
+import { getExpirationTime } from '@/utils/jwt';
+import { serverFetch } from '@/utils/serverFetch';
+import { User } from '@prisma/client';
+import React, { createContext } from 'react';
 import { useEffect, useState } from 'react';
 
 // Define the type for the AuthContext value
@@ -15,8 +15,14 @@ interface AuthenticationResponse {
   refresh_token: string;
 }
 
-interface RefreshResponse {
-  access_token: string;
+interface RefreshResponse extends AuthenticationResponse {
+  user: {
+    email: string;
+    name: string;
+    sub: string;
+    iat: number;
+    exp: number;
+  };
 }
 
 let currentUserInitialized = false;
@@ -29,7 +35,9 @@ let _currentUser: User | null = null;
 const currentUserListeners: ((user: User | null) => void)[] = [];
 
 // Create the context with an initial null value
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 // Define the AuthProvider component
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -47,17 +55,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
-    initialize();    
+    initialize();
   }, []);
 
   if (loading) {
-    return <></>
+    return <></>;
   }
 
   return (
-    <AuthContext.Provider value={currentUser}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={currentUser}>{children}</AuthContext.Provider>
   );
 };
 
@@ -76,7 +82,7 @@ async function initializeCurrentUser() {
   const refreshToken = localStorage.getItem('refresh_token');
 
   // Set the access token and refresh token
-  await setTokens(accessToken, refreshToken ?? undefined);
+  await setTokensAndRefreshTimer(accessToken, refreshToken ?? undefined);
 
   try {
     // Load the current user
@@ -91,7 +97,10 @@ async function initializeCurrentUser() {
       console.error('Failed to get current user: ', error?.message || status);
     }
   } catch (error) {
-    console.error('Failed to get current user: ', (error as Error)?.message || 'Unknown error');
+    console.error(
+      'Failed to get current user: ',
+      (error as Error)?.message || 'Unknown error'
+    );
   }
 }
 
@@ -107,13 +116,16 @@ export function isLoggedIn(): boolean {
 export async function login(email: string, password: string): Promise<void> {
   try {
     // Fetch the access token and refresh token
-    const [, data] = await serverFetch<AuthenticationResponse>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
+    const [, data] = await serverFetch<AuthenticationResponse>(
+      '/api/auth/login',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
     // Set's the tokens in local storage
-    await setTokens(data!.access_token, data!.refresh_token);
+    await setTokensAndRefreshTimer(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
     const [, user] = await serverFetch<User>('/api/user/me', {
@@ -141,9 +153,9 @@ export async function signOut() {
     // Sign out by sending the refresh token to the server
     try {
       await serverFetch('/api/auth/logout', {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ refreshToken: currentRefreshToken }),
       });
@@ -154,7 +166,7 @@ export async function signOut() {
       localStorage.removeItem('refresh_token');
 
       // Stop the refresh timer
-      stopRefreshAccessTokenTimer()
+      stopRefreshAccessTokenTimer();
     }
 
     // Clear the current user
@@ -162,7 +174,11 @@ export async function signOut() {
   }
 }
 
-export async function signUp(email: string, password: string, name: string): Promise<void> {
+export async function signUp(
+  email: string,
+  password: string,
+  name: string
+): Promise<void> {
   try {
     // Fetch the access token and refresh token
     const [, data] = await serverFetch<{
@@ -174,7 +190,7 @@ export async function signUp(email: string, password: string, name: string): Pro
     });
 
     // Set the tokens in local storage
-    await setTokens(data!.access_token, data!.refresh_token);
+    await setTokensAndRefreshTimer(data!.access_token, data!.refresh_token);
 
     // Fetch the current user
     const [, user] = await serverFetch<User>('/api/user/me', {
@@ -188,13 +204,16 @@ export async function signUp(email: string, password: string, name: string): Pro
   }
 }
 
-export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
   await serverFetch('/api/auth/change-password', {
     method: 'POST',
     sendAccessToken: true,
     body: JSON.stringify({ currentPassword, newPassword }),
   });
-};
+}
 
 export function onCurrentUserChange(listener: (user: User | null) => void) {
   currentUserListeners.push(listener);
@@ -218,7 +237,9 @@ export function useCurrentUser() {
   return currentUser;
 }
 
-function setRefreshAccessTokenTimer(timeUntilExpiration: number) {
+async function setRefreshAccessTokenTimer(access_token: string) {
+  const timeUntilExpiration = await getExpirationTime(access_token);
+
   // Set the timer to refresh the token one minute before expiration
   const refreshTimeMs = (timeUntilExpiration - 60) * 1000;
 
@@ -229,9 +250,16 @@ function setRefreshAccessTokenTimer(timeUntilExpiration: number) {
   accessTokenRefreshTimeout = setTimeout(async () => {
     accessTokenRefreshTimeout = null;
     try {
-      const newToken = await refreshAccessToken();
-      setTokens(newToken);
-      timeUntilExpiration = await getExpirationTime(newToken);
+      const { access_token, refresh_token } = (await refreshAccessToken()) || {
+        access_token: null,
+        refresh_token: null,
+      };
+      if (!access_token) {
+        clearTokens();
+        setCurrentUser(null);
+      } else {
+        await setTokensAndRefreshTimer(access_token, refresh_token);        
+      }
     } catch (error) {
       console.error('Failed to refresh access token', error);
     }
@@ -242,12 +270,17 @@ function stopRefreshAccessTokenTimer() {
   if (accessTokenRefreshTimeout) {
     clearTimeout(accessTokenRefreshTimeout);
     accessTokenRefreshTimeout = null;
-  }  
+  }
 }
 
 function setCurrentUser(user: User | null) {
   _currentUser = user;
   currentUserListeners.forEach((listener) => listener(user));
+}
+
+async function clearTokens() {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
 }
 
 async function setTokens(accessToken: string, refreshToken?: string) {
@@ -262,27 +295,35 @@ async function setTokens(accessToken: string, refreshToken?: string) {
   if (refreshToken) {
     localStorage.setItem('refresh_token', refreshToken);
   }
-
-  // Get the expiration time of the access token
-  const timeUntilExpiration = await getExpirationTime(accessToken);
-
-  // Set refresh timer
-  setRefreshAccessTokenTimer(timeUntilExpiration);
 }
 
-async function refreshAccessToken(): Promise<string> {
-  // Make the API request to refresh the access token
-  const [, data] = await serverFetch<RefreshResponse>('/api/auth/refresh', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      refreshToken: localStorage.getItem('refresh_token'),
-    }),
-  });
+async function setTokensAndRefreshTimer(accessToken: string, refreshToken?: string) {
+  // Set the tokens
+  await setTokens(accessToken, refreshToken);
 
-  const { access_token: newToken } = data!;
-  await setTokens(newToken);
-  return newToken;
+  // Set refresh timer
+  await setRefreshAccessTokenTimer(accessToken);
+}
+
+// Make the API request to return the new tokens
+async function refreshAccessToken(): Promise<RefreshResponse | null> {
+  const [, data, error] = await serverFetch<RefreshResponse>(
+    '/api/auth/refresh',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        refreshToken: localStorage.getItem('refresh_token'),
+      }),
+    }
+  );
+
+  if (!data || error) {
+    console.error('Failed to refresh access token');
+    return null;
+  }
+
+  return data!;
 }

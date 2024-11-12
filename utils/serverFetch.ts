@@ -1,14 +1,24 @@
-import { getBaseUrl } from "./getBaseUrl";
+import { getBaseUrl } from './getBaseUrl';
 
 interface ServerFetchOptions extends RequestInit {
   sendAccessToken?: boolean;
   abortTimeout?: number;
 }
 
-export async function serverFetch<T>(url: string, { sendAccessToken, abortTimeout: abortTimeoutInterval, ...options }: ServerFetchOptions = {}): Promise<[number, T | null, Error | null]> {
+export async function serverFetch<T>(
+  url: string,
+  {
+    sendAccessToken,
+    abortTimeout: abortTimeoutInterval,
+    ...options
+  }: ServerFetchOptions = {}
+): Promise<[number, T | null, Error | null]> {
   const baseUrl = getBaseUrl();
   const token = localStorage.getItem('access_token');
-  let headers: HeadersInit = { 'Content-Type': 'application/json', ...options.headers };
+  let headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
 
   if (sendAccessToken && !token) {
     throw new Error('serverFetch: Not authenticated');
@@ -24,7 +34,7 @@ export async function serverFetch<T>(url: string, { sendAccessToken, abortTimeou
     console.log('Could not connect to authentication server... Offline?');
     clearTimeout(abortTimeout!);
     signal.removeEventListener('abort', abortListener);
-  }
+  };
 
   // Add the abort event listener
   if (abortTimeoutInterval) {
@@ -45,23 +55,27 @@ export async function serverFetch<T>(url: string, { sendAccessToken, abortTimeou
     signal.removeEventListener('abort', abortListener);
   }
 
-  // Check if response is empty
-  if (response.ok && response.status !== 204) {
-    try {
-      const data = (await response.json()) as T;
-      return [response.status, data, null];
-    } catch (e) {
-      return [response.status, null, e as Error];
-    }    
+  // Check if the response is OK and return the data
+  if (response.ok) {
+    if (response.status !== 204) {
+      try {
+        const data = (await response.json()) as T;
+        return [response.status, data, null];
+      } catch (e) {
+        return [response.status, null, e as Error];
+      }
+    } else {
+      return [response.status, null, null];
+    }
   }
 
-  if (!response.ok) {
-    let error = 'Request failed';
-    try {
-      error = await response.text();
-    } catch (e) { }
+  // If not, return the error
+  let error = 'Request failed';
+  try {
+    error = await response.text();
+  } catch {
+    const error = 'Request failed';
     return [response.status, null, new Error(error)];
   }
-
-  return [response.status, null, null];
+  return [response.status, null, new Error(error)];
 }
