@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppMiddleware } from '../app.middleware';
+import { RequestLoggingMiddleware } from '../middleware/request-logging.middleware';
 
 export default function setupApp(app: NestExpressApplication) {
   // Register global filter for handling system errors
@@ -16,9 +17,13 @@ export default function setupApp(app: NestExpressApplication) {
   // Enable shutdown hooks
   app.enableShutdownHooks();
 
-  // Top level middleware, logs every request to the console
+  // Top level middleware: Loosen CSP for Swagger routes
   const appMiddleware = new AppMiddleware();
   app.use(appMiddleware.use.bind(appMiddleware));
+
+  // Top level middleware: Logs every request to the console
+  const requestLoggingMiddleware = new RequestLoggingMiddleware();
+  app.use(requestLoggingMiddleware.use.bind(requestLoggingMiddleware));
 
   const listen = async () => {
     // Listen for connections

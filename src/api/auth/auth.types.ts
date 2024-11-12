@@ -190,19 +190,25 @@ export class JwtPayload {
   }
 }
 
-export class LoginResponseDto {
-  @ApiProperty({ example: 'User' })
-  user: JwtPayload;
-
+export class AuthenticationResponseDto {
   @ApiProperty({ example: 'access_token' })
   access_token: string;
 
   @ApiProperty({ example: 'refresh_token' })
   refresh_token: string;
 
-  constructor(user: JwtPayload, access_token: string, refresh_token: string) {
-    this.user = user;
+  constructor(access_token: string, refresh_token: string) {
     this.access_token = access_token;
     this.refresh_token = refresh_token;
+  }
+}
+
+export class LoginResponseDto extends AuthenticationResponseDto {
+  @ApiProperty({ example: 'User' })
+  user: JwtPayload;
+
+  constructor(user: JwtPayload, access_token: string, refresh_token: string) {
+    super(access_token, refresh_token);
+    this.user = user;
   }
 }

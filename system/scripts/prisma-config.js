@@ -1,12 +1,21 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-require-imports */
+/**
+ * This script requires the following npm packages:
+ * - commander
+ * - inquirer
+ * - js-yaml
+ *
+ * Install them by running:
+ * npm install commander inquirer js-yaml
+ */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { Command } = require('commander');
 const inquirer = require('inquirer').default || require('inquirer');
 const fs = require('fs');
 const path = require('path');
 const child_process = require('child_process');
-const yaml = require('js-yaml'); // Add this line to require js-yaml
+const yaml = require('js-yaml');
 
 const program = new Command();
 
@@ -37,31 +46,6 @@ const options = program.opts();
 
 // List of .env files to update
 const envFiles = ['.env', '.env.docker', '.env.docker.dev'];
-
-/**
- * Generates the DATABASE_URL based on the provider and connection details.
- * @param {string} provider - The database provider.
- * @param {object} dbAnswers - The database connection details.
- * @returns {string} - The DATABASE_URL string.
- */
-function generateDatabaseUrl(provider, dbAnswers) {
-  switch (provider) {
-    case 'postgresql':
-      return `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
-    case 'mysql':
-      return `mysql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
-    case 'sqlite':
-      return `file:./${dbAnswers.database}.db`;
-    case 'sqlserver':
-      return `sqlserver://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address};database=${dbAnswers.database}`;
-    case 'mongodb':
-      return `mongodb://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}`;
-    case 'cockroachdb':
-      return `postgresql://${dbAnswers.user}:${dbAnswers.password}@${dbAnswers.address}/${dbAnswers.database}?sslmode=disable`;
-    default:
-      throw new Error(`Unsupported provider: ${provider}`);
-  }
-}
 
 /**
  * Database service configurations for docker-compose files.
@@ -211,14 +195,14 @@ async function main() {
             provider === 'mysql'
               ? 'localhost:3306'
               : provider === 'postgresql'
-              ? 'localhost:5432'
-              : provider === 'sqlserver'
-              ? 'localhost:1433'
-              : provider === 'mongodb'
-              ? 'localhost:27017'
-              : provider === 'cockroachdb'
-              ? 'localhost:26257'
-              : 'localhost',
+                ? 'localhost:5432'
+                : provider === 'sqlserver'
+                  ? 'localhost:1433'
+                  : provider === 'mongodb'
+                    ? 'localhost:27017'
+                    : provider === 'cockroachdb'
+                      ? 'localhost:26257'
+                      : 'localhost',
         },
         {
           type: 'input',
@@ -242,6 +226,37 @@ async function main() {
     }
 
     dbAnswers = await inquirer.prompt(dbQuestions);
+
+    // In the main function, after dbAnswers is populated
+    let host = dbAnswers.address;
+    let port = '';
+    if (dbAnswers.address.includes(':')) {
+      [host, port] = dbAnswers.address.split(':');
+    } else {
+      port = getDefaultPort(provider);
+    }
+
+    dbAnswers.address = `${host}:${port}`;
+
+    // Helper function to get default port
+    function getDefaultPort(provider) {
+      switch (provider) {
+        case 'postgresql':
+          return '5432';
+        case 'mysql':
+          return '3306';
+        case 'sqlite':
+          return '';
+        case 'sqlserver':
+          return '1433';
+        case 'mongodb':
+          return '27017';
+        case 'cockroachdb':
+          return '26257';
+        default:
+          throw new Error("")
+      }
+    }
   }
 
   // Generate the DATABASE_URL
@@ -263,6 +278,36 @@ async function main() {
   updateDockerComposeFiles(provider);
 
   console.log('Database provider has been switched successfully!');
+}
+
+/**
+ * Generates the DATABASE_URL based on the provider and connection details.
+ * @param {string} provider - The database provider.
+ * @param {object} dbAnswers - The database connection details.
+ * @returns {string} - The DATABASE_URL string.
+ */
+function generateDatabaseUrl(provider, dbAnswers) {
+  const user = encodeURIComponent(dbAnswers.user);
+  const password = encodeURIComponent(dbAnswers.password);
+  const address = dbAnswers.address;
+  const database = encodeURIComponent(dbAnswers.database);
+
+  switch (provider) {
+    case 'postgresql':
+      return `postgresql://${user}:${password}@${address}/${database}`;
+    case 'mysql':
+      return `mysql://${user}:${password}@${address}/${database}`;
+    case 'sqlite':
+      return `file:./${database}.db`;
+    case 'sqlserver':
+      return `sqlserver://${user}:${password}@${address};database=${database}`;
+    case 'mongodb':
+      return `mongodb://${user}:${password}@${address}/${database}`;
+    case 'cockroachdb':
+      return `postgresql://${user}:${password}@${address}/${database}?sslmode=disable`;
+    default:
+      throw new Error(`Unsupported provider: ${provider}`);
+  }
 }
 
 /**
